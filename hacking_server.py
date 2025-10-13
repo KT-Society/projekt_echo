@@ -235,13 +235,15 @@ def index():
     """Main page - shows basic information"""
     if request.method == 'OPTIONS':
         # Handle OPTIONS request for educational purposes
-        response = make_response('', 200)
+        response = make_response('OPTIONS request successful - Allowed methods: GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH', 200)
         response.headers['Allow'] = 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH'
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-API-Key'
         response.headers['Access-Control-Allow-Origin'] = '*'
         response.headers['Server'] = 'Apache/2.4.41 (Ubuntu)'
         response.headers['X-Powered-By'] = 'PHP/7.4.3'
+        response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+        response.headers['Content-Length'] = str(len('OPTIONS request successful - Allowed methods: GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH'))
         return response
     elif request.method == 'HEAD':
         # Handle HEAD request
@@ -253,6 +255,190 @@ def index():
         return response
     else:
         return render_template('index.html')
+
+@app.route('/robots.txt')
+def robots_txt():
+    """Serve robots.txt file"""
+    robots_content = """# robots.txt for https://127.0.0.1:5000
+# Educational Purpose Only - Contains Intentional Vulnerabilities
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /private/
+Disallow: /backup/
+Disallow: /logs/
+Disallow: /config/
+Disallow: /database/
+Disallow: /.env
+Disallow: /.env.local
+Disallow: /debug
+Disallow: /test
+Disallow: /api/internal/
+Disallow: /temp/
+Disallow: /uploads/
+Disallow: /.git/
+Disallow: /node_modules/
+Disallow: /vendor/
+
+# Allow specific educational endpoints
+Allow: /login
+Allow: /api/
+Allow: /docs/
+Allow: /help
+
+# Crawl delay for educational purposes
+Crawl-delay: 2
+
+# Sitemap location
+Sitemap: https://127.0.0.1:5000/sitemap.xml
+
+# Additional information
+# This server contains intentional security vulnerabilities
+# for educational purposes only. Do not use in production!"""
+    
+    response = make_response(robots_content, 200)
+    response.headers['Content-Type'] = 'text/plain; charset=utf-8'
+    response.headers['Server'] = 'Apache/2.4.41 (Ubuntu)'
+    response.headers['X-Powered-By'] = 'PHP/7.4.3'
+    return response
+
+@app.route('/sitemap.xml')
+def sitemap_xml():
+    """Serve sitemap.xml file"""
+    sitemap_content = """<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Main Pages -->
+  <url>
+    <loc>https://127.0.0.1:5000/</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Authentication Pages -->
+  <url>
+    <loc>https://127.0.0.1:5000/login</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/register</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- API Endpoints -->
+  <url>
+    <loc>https://127.0.0.1:5000/api/</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/api/users</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/api/data</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Documentation -->
+  <url>
+    <loc>https://127.0.0.1:5000/docs/</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/help</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Educational Content -->
+  <url>
+    <loc>https://127.0.0.1:5000/tutorials/</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/examples/</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Status Pages -->
+  <url>
+    <loc>https://127.0.0.1:5000/status</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/health</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Contact and About -->
+  <url>
+    <loc>https://127.0.0.1:5000/contact</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/about</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Privacy and Terms -->
+  <url>
+    <loc>https://127.0.0.1:5000/privacy</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/terms</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>"""
+    
+    response = make_response(sitemap_content, 200)
+    response.headers['Content-Type'] = 'application/xml; charset=utf-8'
+    response.headers['Server'] = 'Apache/2.4.41 (Ubuntu)'
+    response.headers['X-Powered-By'] = 'PHP/7.4.3'
+    return response
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

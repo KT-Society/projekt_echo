@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Main Pages -->
+  <url>
+    <loc>https://127.0.0.1:5000/</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Authentication Pages -->
+  <url>
+    <loc>https://127.0.0.1:5000/login</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/register</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- API Endpoints -->
+  <url>
+    <loc>https://127.0.0.1:5000/api/</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/api/users</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/api/data</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Documentation -->
+  <url>
+    <loc>https://127.0.0.1:5000/docs/</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/help</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Educational Content -->
+  <url>
+    <loc>https://127.0.0.1:5000/tutorials/</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/examples/</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Status Pages -->
+  <url>
+    <loc>https://127.0.0.1:5000/status</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+      <loc>https://127.0.0.1:5000/health</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>hourly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Contact and About -->
+  <url>
+    <loc>https://127.0.0.1:5000/contact</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/about</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!-- Privacy and Terms -->
+  <url>
+    <loc>https://127.0.0.1:5000/privacy</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <url>
+    <loc>https://127.0.0.1:5000/terms</loc>
+    <lastmod>2025-10-13T06:00:00+00:00</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>

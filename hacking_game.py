@@ -2,7 +2,7 @@
 
 # =============================================
 
-# HACKING LEARNING GAME v1.1 | ECHO'S CHAOS EDITION
+# HACKING LEARNING GAME BETA v1.0.1 | ECHO'S CHAOS EDITION
 
 # =============================================
 
@@ -83,15 +83,15 @@ class HackingGame:
                 pass
 
     def start_server(self):
-        """Start the hacking server"""
+        """Start the hacking server with robust connection checking"""
         try:
             print("🚀 Starte Hacking-Server...")
-            
+
             # Check if server file exists
             if not os.path.exists("hacking_server.py"):
                 print("❌ hacking_server.py nicht gefunden!")
                 return False
-            
+
             # Start server process with .venv (quiet mode)
             if sys.platform.startswith('win'):
                 # Windows: Use .venv python
@@ -99,13 +99,13 @@ class HackingGame:
                 if os.path.exists(venv_python):
                     self.server_process = subprocess.Popen([
                         venv_python, "hacking_server.py"
-                    ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+                    ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                        creationflags=subprocess.CREATE_NO_WINDOW)
                 else:
                     # Fallback to system python
                     self.server_process = subprocess.Popen([
                         sys.executable, "hacking_server.py"
-                    ], stdout=subprocess.PIPE, stderr=subprocess.PIPE, 
+                    ], stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                        creationflags=subprocess.CREATE_NO_WINDOW)
             else:
                 # Unix: Use .venv python
@@ -119,35 +119,67 @@ class HackingGame:
                     self.server_process = subprocess.Popen([
                         sys.executable, "hacking_server.py"
                     ], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            
+
             print("⏳ Warte auf Server-Start...")
-            
-            # Wait longer for server to start
-            for i in range(10):
-                time.sleep(1)
-                try:
-                    # Try to connect to server
-                    if HAS_REQUESTS:
-                        response = requests.get("http://127.0.0.1:5000", timeout=2)
+
+            # Enhanced server startup detection
+            max_wait_time = 15  # Increased wait time
+            check_interval = 0.5  # Check every 500ms
+
+            for i in range(int(max_wait_time / check_interval)):
+                time.sleep(check_interval)
+
+                # Multiple connection attempts with different methods
+                server_responding = False
+
+                # Method 1: requests library
+                if HAS_REQUESTS:
+                    try:
+                        response = requests.get("http://127.0.0.1:5000", timeout=1)
                         if response.status_code == 200:
-                            self.server_running = True
-                            print("✅ Server läuft auf http://127.0.0.1:5000")
-                            return True
-                    else:
+                            server_responding = True
+                    except:
+                        pass
+
+                # Method 2: urllib
+                if not server_responding:
+                    try:
                         import urllib.request
-                        response = urllib.request.urlopen("http://127.0.0.1:5000", timeout=2)
+                        response = urllib.request.urlopen("http://127.0.0.1:5000", timeout=1)
                         if response.getcode() == 200:
-                            self.server_running = True
-                            print("✅ Server läuft auf http://127.0.0.1:5000")
-                            return True
-                except:
-                    print(f"⏳ Warte... ({i+1}/10)")
-                    continue
-            
-            print("⚠️  Server-Start fehlgeschlagen, aber Spiel läuft weiter...")
+                            server_responding = True
+                    except:
+                        pass
+
+                # Method 3: Check if process is still running
+                if not server_responding and self.server_process:
+                    if self.server_process.poll() is None:  # Process still running
+                        server_responding = True
+
+                if server_responding:
+                    self.server_running = True
+                    print("✅ Server läuft auf http://127.0.0.1:5000")
+                    print("🔍 Debug-Endpoint: http://127.0.0.1:5000/debug")
+                    return True
+
+                # Show progress
+                if i % 4 == 0:  # Every 2 seconds
+                    print(f"⏳ Warte auf Server... ({i*check_interval:.0f}/{max_wait_time}s)")
+
+            # Final check - see if server process is still alive
+            if self.server_process and self.server_process.poll() is None:
+                print("✅ Server läuft (kein HTTP-Test möglich, aber Prozess aktiv)")
+                self.server_running = True
+                return True
+
+            print("❌ Server-Start fehlgeschlagen!")
+            print("💡 Mögliche Ursachen:")
+            print("   - Port 5000 ist bereits belegt")
+            print("   - Firewall blockiert die Verbindung")
+            print("   - Python-Version nicht kompatibel")
             print("💡 Du kannst den Server manuell starten: python hacking_server.py")
             return False
-            
+
         except Exception as e:
             print(f"❌ Fehler beim Server-Start: {e}")
             print("💡 Du kannst den Server manuell starten: python hacking_server.py")
@@ -187,7 +219,7 @@ class HackingGame:
         self.running = True
         self.server_process = None
         self.server_running = False
-        self.retro_effects = True  # Retro effects enabled by default
+        self.retro_effects = False  # Retro effects enabled by default
         
         # Graceful exit setup
         self.setup_graceful_exit()
@@ -501,10 +533,145 @@ class HackingGame:
         except (EOFError, KeyboardInterrupt):
             self.graceful_exit()
 
+    def execute_curl_command(self, curl_cmd):
+        """Execute curl command and return real server response"""
+        try:
+            # Parse curl command to extract URL and method
+            import re
+
+            # Extract URL
+            url_match = re.search(r'https?://[^\s\'"]+', curl_cmd)
+            if not url_match:
+                return None
+
+            url = url_match.group()
+
+            # Determine HTTP method
+            method = 'GET'
+            if '-X POST' in curl_cmd or '--data' in curl_cmd:
+                method = 'POST'
+            elif '-X PUT' in curl_cmd:
+                method = 'PUT'
+            elif '-X DELETE' in curl_cmd:
+                method = 'DELETE'
+            elif '-X OPTIONS' in curl_cmd:
+                method = 'OPTIONS'
+            elif '-X HEAD' in curl_cmd:
+                method = 'HEAD'
+
+            # Extract data for POST requests
+            data = None
+            data_match = re.search(r'-d\s+[\'"]([^\'"]+)[\'"]', curl_cmd)
+            if data_match:
+                data = data_match.group(1)
+
+            # Extract headers
+            headers = {}
+            header_matches = re.findall(r'-H\s+[\'"]([^\'"]+)[\'"]', curl_cmd)
+            for header in header_matches:
+                if ':' in header:
+                    key, value = header.split(':', 1)
+                    headers[key.strip()] = value.strip()
+
+            # Execute request using requests library
+            if HAS_REQUESTS:
+                if method == 'POST' and data:
+                    response = requests.post(url, data=data, headers=headers, timeout=10)
+                elif method == 'PUT':
+                    response = requests.put(url, data=data, headers=headers, timeout=10)
+                elif method == 'DELETE':
+                    response = requests.delete(url, headers=headers, timeout=10)
+                elif method == 'OPTIONS':
+                    response = requests.options(url, headers=headers, timeout=10)
+                elif method == 'HEAD':
+                    response = requests.head(url, headers=headers, timeout=10)
+                else:
+                    response = requests.get(url, headers=headers, timeout=10)
+
+                return response.text
+            else:
+                # Fallback to urllib
+                import urllib.request
+                import urllib.parse
+
+                if method == 'POST' and data:
+                    data_bytes = data.encode('utf-8')
+                    request_obj = urllib.request.Request(url, data=data_bytes, headers=headers, method=method)
+                else:
+                    request_obj = urllib.request.Request(url, headers=headers, method=method)
+
+                with urllib.request.urlopen(request_obj, timeout=10) as response:
+                    return response.read().decode('utf-8')
+
+        except Exception as e:
+            print(f"❌ Server communication error: {e}")
+            return None
+
+    def check_level_success(self, level, response_text, original_cmd):
+        """Check if level was successfully completed based on real server response"""
+        if not response_text:
+            return False
+
+        target_value = self.get_target_value(level)
+
+        # Level-specific success indicators
+        if level == 1:
+            # Level 1: Look for API key in .env.local or debug endpoint
+            success_indicators = [
+                target_value in response_text,
+                "API_KEY=" in response_text,
+                "level_1_secret_file" in response_text,
+                "FLAG_LEVEL_1_DISCOVERED" in response_text
+            ]
+            return any(success_indicators)
+
+        elif level == 2:
+            # Level 2: Look for API secret endpoint access
+            success_indicators = [
+                "Access granted" in response_text,
+                target_value in response_text,
+                "FLAG_LEVEL_2_DISCOVERED" in response_text,
+                "secret API" in response_text.lower()
+            ]
+            return any(success_indicators)
+
+        elif level == 3:
+            # Level 3: Look for SQL injection success
+            success_indicators = [
+                "Welcome" in response_text,
+                "dashboard" in response_text,
+                target_value in response_text,
+                "SQL" in response_text and "error" in response_text.lower()
+            ]
+            return any(success_indicators)
+
+        elif level == 4:
+            # Level 4: Look for XSS success
+            success_indicators = [
+                "XSS" in response_text,
+                "alert" in response_text,
+                "script" in response_text.lower(),
+                target_value in response_text,
+                "cookie" in response_text.lower()
+            ]
+            return any(success_indicators)
+
+        elif level == 5:
+            # Level 5: Look for forensics success
+            success_indicators = [
+                target_value in response_text,
+                "encryption" in response_text.lower(),
+                "key" in response_text.lower(),
+                "forensic" in response_text.lower()
+            ]
+            return any(success_indicators)
+
+        return False
+
     def check_server_status(self):
         """Check server status"""
         print("\n🔍 Server-Status:")
-        
+
         # Check if server is running by trying to connect
         server_responding = False
         try:
@@ -519,7 +686,7 @@ class HackingGame:
                     server_responding = True
         except:
             pass
-        
+
         if server_responding:
             print("✅ Server läuft und ist erreichbar")
             print("🌐 URL: http://127.0.0.1:5000")
@@ -539,7 +706,7 @@ class HackingGame:
                     print("💡 Starte das Spiel (Option 1), um den Server automatisch zu starten")
             except (EOFError, KeyboardInterrupt):
                 pass
-        
+
         try:
             input("\nDrücke Enter zum Fortfahren...")
         except (EOFError, KeyboardInterrupt):
@@ -763,7 +930,7 @@ class HackingGame:
         banner = """
 ╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
-║  [ECHO'S ULTIMATE HACKING SIMULATOR BETA v1.0.0]             ║
+║  [ECHO'S ULTIMATE HACKING SIMULATOR BETA v1.0.1]             ║
 ║  [          EDUCATIONAL PURPOSE ONLY!          ]             ║
 ║  [DO NOT USE ON REAL SYSTEMS WITHOUT PERMISSION]             ║
 ║                                                              ║
@@ -849,9 +1016,6 @@ class HackingGame:
                 self.echo_chat("hint")
                 continue
             elif cmd == "/help":
-                self.show_level_help(2)
-                continue
-            elif cmd == "/help":
                 self.show_level_help(1)
                 continue
 
@@ -877,12 +1041,13 @@ class HackingGame:
             try:
                 # Execute the command with proper encoding handling
                 result = subprocess.run(cmd, shell=True, capture_output=True, text=True, 
-                                      timeout=15, encoding='utf-8', errors='replace')
+                                    timeout=15, encoding='utf-8', errors='replace')
 
                 # Simulate old terminal command execution
                 self.simulate_command_execution(cmd, result.stdout)
                 
-                if result.stderr:
+                # Only show error if there's actual stderr content (not just curl progress info)
+                if result.stderr and result.stderr.strip() and not result.stderr.startswith('  % Total'):
                     self.typewriter_effect("⚠️  FEHLER:", delay=0.02, color_code="31")
                     self.typewriter_effect(result.stderr, delay=0.01, color_code="31")
 
@@ -920,7 +1085,7 @@ class HackingGame:
         self.current_level = 2
 
     def level_2_network_fundamentals(self):
-        """Level 2: Network Discovery & Reconnaissance"""
+        """Level 2: Network Discovery & Reconnaissance with real server communication"""
         self.simulate_old_terminal("\n🌐 MISSION: Führe eine umfassende Netzwerk-Rekonnaissance durch!", delay=0.02)
         self.simulate_old_terminal("💡 TIPP: Lerne echte Hacking-Techniken für Network Discovery!", delay=0.02)
         self.echo_chat("hint")
@@ -930,7 +1095,7 @@ class HackingGame:
 
         # Get platform-specific commands
         commands = self.get_platform_commands()
-        
+
         # Comprehensive Tutorial
         print("\n" + "="*70)
         print("📚 TUTORIAL: Network Discovery & Reconnaissance")
@@ -948,7 +1113,7 @@ class HackingGame:
             print(f"   {commands['port_scan_all']}              → Alle Ports scannen")
             print(f"   {commands['port_scan_service']}              → Service Detection")
             print(f"   {commands['port_scan_os']}               → OS Detection")
-        
+
         print(f"\n🌐 WEB APPLICATION SCANNING ({sys.platform.upper()}):")
         print(f"   {commands['web_scan']}  → Basic Web Scan")
         if not sys.platform.startswith('win'):
@@ -958,7 +1123,7 @@ class HackingGame:
         print(f"   {commands['http_methods']} → HTTP Methods")
         if sys.platform.startswith('win'):
             print(f"   {commands['web_scan_ps']}")
-        
+
         print("\n🔍 ADVANCED VULNERABILITY TESTING:")
         print("   curl -X POST -d 'url=http://localhost:22' http://127.0.0.1:5000/ssrf")
         print("   curl -X POST -d 'cmd=whoami' http://127.0.0.1:5000/command")
@@ -973,7 +1138,7 @@ class HackingGame:
 
         print(f"\n🔍 ZIEL: Finde den API-Key: {target_value[:8]}...")
         print("💻 Verwende echte Network Discovery Tools")
-        
+
         print("\n🎯 MISSION: Scanne den Server und finde versteckte Endpunkte!")
         print("💡 HINWEIS: Der API-Key ist in einem versteckten Endpunkt versteckt!")
         print("🔍 VERSUCHE: curl http://127.0.0.1:5000/api/secret oder ähnliche Endpunkte!")
@@ -1011,43 +1176,68 @@ class HackingGame:
 
             try:
                 # Execute the command with proper encoding handling
-                result = subprocess.run(cmd, shell=True, capture_output=True, text=True, 
-                                      timeout=20, encoding='utf-8', errors='replace')
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+                                    timeout=20, encoding='utf-8', errors='replace')
 
                 # Show realistic command output
                 print(f"\n💻 {self.player_name}@hacking-target:~$ {cmd}")
-                
-                if result.stdout:
-                    print("📄 AUSGABE:")
-                    print(result.stdout)
-                elif result.stderr:
-                    print("⚠️  FEHLER:")
-                    print(result.stderr)
+
+                # Enhanced curl command handling with real server communication
+                if "curl" in cmd.lower() and ("127.0.0.1:5000" in cmd or "localhost:5000" in cmd):
+                    server_response = self.execute_curl_command(cmd)
+                    if server_response:
+                        print("📄 SERVER ANTWORT:")
+                        print(server_response)
+
+                        # Check for success indicators in real server response
+                        if self.check_level_success(2, server_response, cmd):
+                            print(f"\n🎉 ERFOLG! Du hast den API-Key gefunden: {target_value}")
+                            print("🏆 Level 2 abgeschlossen! +150 Punkte")
+                            print("\n📚 WAS DU GELERNT HAST:")
+                            print("   • Port Scanning mit nmap")
+                            print("   • Service Detection und Enumeration")
+                            print("   • Web Application Vulnerability Scanning")
+                            print("   • Directory Brute-Forcing")
+                            print("   • HTTP Header Analysis")
+                            print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                            print("   • API-Keys nie im Code hardcoden")
+                            print("   • Rate-Limiting für API-Endpunkte")
+                            print("   • IP-Whitelisting für sensible APIs")
+                            print("   • API-Key-Rotation regelmäßig durchführen")
+                            print("   • API-Gateway mit Authentifizierung verwenden")
+                            self.score += 150
+                            break
+                    else:
+                        print("📄 (Keine Antwort vom Server)")
                 else:
-                    # Show realistic "no output" for different command types
-                    if "curl" in cmd.lower():
-                        print("📄 (Keine Ausgabe)")
-                    elif "nmap" in cmd.lower():
-                        print("📄 Starting Nmap scan...")
-                        print("📄 Nmap scan report for 127.0.0.1")
-                        print("📄 Host is up (0.0001s latency).")
-                        print("📄 Not shown: 999 closed ports")
-                        print("📄 PORT     STATE SERVICE")
-                        print("📄 5000/tcp open  http")
-                    elif "netstat" in cmd.lower():
-                        print("📄 Active Connections")
-                        print("📄 Proto  Local Address          Foreign Address        State")
-                        print("📄 TCP    127.0.0.1:5000         0.0.0.0:0              LISTENING")
+                    # Handle non-curl commands
+                    if result.stdout:
+                        print("📄 AUSGABE:")
+                        print(result.stdout)
+                    elif result.stderr and result.stderr.strip() and not result.stderr.startswith('  % Total'):
+                        print("⚠️  FEHLER:")
+                        print(result.stderr)
                     else:
                         print("📄 (Keine Ausgabe)")
 
-                # Check for specific success indicators - only real API access
-                success_indicators = [
-                    "Access granted" in (result.stdout or ""),
-                    target_value in (result.stdout or ""),
-                    "FLAG_LEVEL_2_DISCOVERED" in (result.stdout or ""),
-                    "secret API" in (result.stdout or "").lower()
-                ]
+                    # Check for success in non-curl command output
+                    if self.check_level_success(2, result.stdout or "", cmd):
+                        print(f"\n🎉 ERFOLG! Du hast den API-Key gefunden: {target_value}")
+                        print("🏆 Level 2 abgeschlossen! +150 Punkte")
+                        print("\n📚 WAS DU GELERNT HAST:")
+                        print("   • Port Scanning mit nmap")
+                        print("   • Service Detection und Enumeration")
+                        print("   • Web Application Vulnerability Scanning")
+                        print("   • Directory Brute-Forcing")
+                        print("   • HTTP Header Analysis")
+                        print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                        print("   • API-Keys nie im Code hardcoden")
+                        print("   • Rate-Limiting für API-Endpunkte")
+                        print("   • IP-Whitelisting für sensible APIs")
+                        print("   • API-Key-Rotation regelmäßig durchführen")
+                        print("   • API-Gateway mit Authentifizierung verwenden")
+                        self.score += 150
+                        break
 
                 # Check if user directly entered the target value
                 if cmd.strip() == target_value:
@@ -1062,24 +1252,6 @@ class HackingGame:
                     self.score += 150
                     break
 
-                if any(success_indicators):
-                    print(f"\n🎉 ERFOLG! Du hast den API-Key gefunden: {target_value}")
-                    print("🏆 Level 2 abgeschlossen! +150 Punkte")
-                    print("\n📚 WAS DU GELERNT HAST:")
-                    print("   • Port Scanning mit nmap")
-                    print("   • Service Detection und Enumeration")
-                    print("   • Web Application Vulnerability Scanning")
-                    print("   • Directory Brute-Forcing")
-                    print("   • HTTP Header Analysis")
-                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
-                    print("   • API-Keys nie im Code hardcoden")
-                    print("   • Rate-Limiting für API-Endpunkte")
-                    print("   • IP-Whitelisting für sensible APIs")
-                    print("   • API-Key-Rotation regelmäßig durchführen")
-                    print("   • API-Gateway mit Authentifizierung verwenden")
-                    self.score += 150
-                    break
-
             except subprocess.TimeoutExpired:
                 print("⏰ Befehl ist abgelaufen. Probiere einen anderen Ansatz.")
             except Exception as e:
@@ -1089,7 +1261,7 @@ class HackingGame:
         self.current_level = 3
 
     def level_3_password_cracking(self):
-        """Level 3: SQL Injection Attack"""
+        """Level 3: SQL Injection Attack with real server communication"""
         self.simulate_old_terminal("\n🔐 MISSION: Führe eine umfassende SQL Injection Attack durch!", delay=0.02)
         self.simulate_old_terminal("💡 TIPP: Lerne echte SQL Injection-Techniken!", delay=0.02)
         self.echo_chat("hint")
@@ -1145,51 +1317,48 @@ class HackingGame:
             try:
                 # Test SQL injection with curl
                 cmd = f"curl -X POST -d 'username={payload}&password=anything' http://127.0.0.1:5000/login"
-                result = subprocess.run(cmd, shell=True, capture_output=True, text=True, 
-                                      timeout=15, encoding='utf-8', errors='replace')
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+                                    timeout=15, encoding='utf-8', errors='replace')
 
                 print("📄 SERVER ANTWORT:")
                 if result.stdout:
                     print(result.stdout)
                 else:
                     print("(Keine Ausgabe)")
-                    
-                if result.stderr:
+
+                # Only show error if there's actual stderr content (not just curl progress info)
+                if result.stderr and result.stderr.strip() and not result.stderr.startswith('  % Total'):
                     print("⚠️  FEHLER:")
                     print(result.stderr)
 
-                # Check for various success indicators
-                success_indicators = [
-                    "Welcome" in (result.stdout or ""),
-                    "dashboard" in (result.stdout or ""),
-                    "admin" in (result.stdout or "") and "password" in (result.stdout or ""),
-                    target_value in (result.stdout or ""),
-                    "MySQL" in (result.stdout or ""),
-                    "SQLite" in (result.stdout or ""),
-                    "error" in (result.stdout or "").lower() and "sql" in (result.stdout or "").lower()
-                ]
+                # Enhanced success checking with real server response
+                server_response = self.execute_curl_command(cmd)
+                if server_response:
+                    print("📄 ECHTE SERVER ANTWORT:")
+                    print(server_response)
+
+                    # Check for success indicators in real server response
+                    if self.check_level_success(3, server_response, cmd):
+                        print("\n🎉 ERFOLG! SQL Injection hat funktioniert!")
+                        print("🏆 Level 3 abgeschlossen! +200 Punkte")
+                        print("\n📚 WAS DU GELERNT HAST:")
+                        print("   • Union-based SQL Injection")
+                        print("   • Blind SQL Injection (Boolean & Time-based)")
+                        print("   • Error-based SQL Injection")
+                        print("   • Database Schema Enumeration")
+                        print("   • Data Extraction Techniques")
+                        print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                        print("   • Prepared Statements verwenden (niemals String-Konkatenation)")
+                        print("   • Input-Validierung und -Sanitization")
+                        print("   • ORM-Frameworks verwenden")
+                        print("   • Least Privilege Principle für DB-User")
+                        print("   • WAF (Web Application Firewall) einsetzen")
+                        self.score += 200
+                        break
 
                 # Check if user directly entered the target value
                 if payload.strip() == target_value:
                     print(f"\n🎉 ERFOLG! Du hast den Admin-Hash direkt eingegeben: {target_value}")
-                    print("🏆 Level 3 abgeschlossen! +200 Punkte")
-                    print("\n📚 WAS DU GELERNT HAST:")
-                    print("   • Union-based SQL Injection")
-                    print("   • Blind SQL Injection (Boolean & Time-based)")
-                    print("   • Error-based SQL Injection")
-                    print("   • Database Schema Enumeration")
-                    print("   • Data Extraction Techniques")
-                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
-                    print("   • Prepared Statements verwenden (niemals String-Konkatenation)")
-                    print("   • Input-Validierung und -Sanitization")
-                    print("   • ORM-Frameworks verwenden")
-                    print("   • Least Privilege Principle für DB-User")
-                    print("   • WAF (Web Application Firewall) einsetzen")
-                    self.score += 200
-                    break
-
-                if any(success_indicators):
-                    print("\n🎉 ERFOLG! SQL Injection hat funktioniert!")
                     print("🏆 Level 3 abgeschlossen! +200 Punkte")
                     print("\n📚 WAS DU GELERNT HAST:")
                     print("   • Union-based SQL Injection")
@@ -1215,7 +1384,7 @@ class HackingGame:
         self.current_level = 4
 
     def level_4_web_exploitation(self):
-        """Level 4: XSS (Cross-Site Scripting) Attack"""
+        """Level 4: XSS (Cross-Site Scripting) Attack with real server communication"""
         self.simulate_old_terminal("\n🌐 MISSION: Führe eine umfassende XSS Attack durch!", delay=0.02)
         self.simulate_old_terminal("💡 TIPP: Lerne echte XSS-Techniken und Filter-Bypass!", delay=0.02)
         self.echo_chat("hint")
@@ -1267,57 +1436,54 @@ class HackingGame:
                 self.echo_chat("hint")
                 continue
             elif payload == "/help":
-                self.show_level_help(3)
+                self.show_level_help(4)
                 continue
 
             try:
                 # Test XSS with curl
                 cmd = f"curl -X POST -d 'comment={payload}' http://127.0.0.1:5000/comments"
-                result = subprocess.run(cmd, shell=True, capture_output=True, text=True, 
-                                      timeout=10, encoding='utf-8', errors='replace')
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+                                    timeout=10, encoding='utf-8', errors='replace')
 
                 print("📄 SERVER ANTWORT:")
                 if result.stdout:
                     print(result.stdout)
                 else:
                     print("(Keine Ausgabe)")
-                    
-                if result.stderr:
+
+                # Only show error if there's actual stderr content (not just curl progress info)
+                if result.stderr and result.stderr.strip() and not result.stderr.startswith('  % Total'):
                     print("⚠️  FEHLER:")
                     print(result.stderr)
 
-                # Check for various success indicators
-                success_indicators = [
-                    "XSS" in (result.stdout or ""),
-                    "alert" in (result.stdout or ""),
-                    "script" in (result.stdout or "").lower(),
-                    target_value in (result.stdout or ""),
-                    "cookie" in (result.stdout or "").lower(),
-                    "session" in (result.stdout or "").lower(),
-                    "javascript" in (result.stdout or "").lower()
-                ]
+                # Enhanced success checking with real server response
+                server_response = self.execute_curl_command(cmd)
+                if server_response:
+                    print("📄 ECHTE SERVER ANTWORT:")
+                    print(server_response)
+
+                    # Check for success indicators in real server response
+                    if self.check_level_success(4, server_response, cmd):
+                        print("\n🎉 ERFOLG! XSS Attack hat funktioniert!")
+                        print("🏆 Level 4 abgeschlossen! +250 Punkte")
+                        print("\n📚 WAS DU GELERNT HAST:")
+                        print("   • Reflected XSS")
+                        print("   • Stored XSS")
+                        print("   • DOM-based XSS")
+                        print("   • Filter Bypass Techniques")
+                        print("   • Session Hijacking")
+                        print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                        print("   • Input-Escaping und Output-Encoding")
+                        print("   • Content Security Policy (CSP) Headers")
+                        print("   • HTTPOnly und Secure Flags für Cookies")
+                        print("   • DOM Sanitization Libraries verwenden")
+                        print("   • Template-Engines mit Auto-Escaping")
+                        self.score += 250
+                        break
 
                 # Check if user directly entered the target value
                 if payload.strip() == target_value:
                     print(f"\n🎉 ERFOLG! Du hast den Session-Cookie direkt eingegeben: {target_value}")
-                    print("🏆 Level 4 abgeschlossen! +250 Punkte")
-                    print("\n📚 WAS DU GELERNT HAST:")
-                    print("   • Reflected XSS")
-                    print("   • Stored XSS")
-                    print("   • DOM-based XSS")
-                    print("   • Filter Bypass Techniques")
-                    print("   • Session Hijacking")
-                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
-                    print("   • Input-Escaping und Output-Encoding")
-                    print("   • Content Security Policy (CSP) Headers")
-                    print("   • HTTPOnly und Secure Flags für Cookies")
-                    print("   • DOM Sanitization Libraries verwenden")
-                    print("   • Template-Engines mit Auto-Escaping")
-                    self.score += 250
-                    break
-
-                if any(success_indicators):
-                    print("\n🎉 ERFOLG! XSS Attack hat funktioniert!")
                     print("🏆 Level 4 abgeschlossen! +250 Punkte")
                     print("\n📚 WAS DU GELERNT HAST:")
                     print("   • Reflected XSS")
@@ -1343,7 +1509,7 @@ class HackingGame:
         self.current_level = 5
 
     def level_5_advanced_topics(self):
-        """Level 5: Digital Forensics & Advanced Hacking"""
+        """Level 5: Digital Forensics & Advanced Hacking with real server communication"""
         self.simulate_old_terminal("\n🔬 MISSION: Führe eine umfassende Forensik-Analyse durch!", delay=0.02)
         self.simulate_old_terminal("💡 TIPP: Lerne echte Forensik-Techniken und Advanced Hacking!", delay=0.02)
         self.echo_chat("hint")
@@ -1417,77 +1583,74 @@ class HackingGame:
 
             try:
                 # Execute the command with proper encoding handling
-                result = subprocess.run(cmd, shell=True, capture_output=True, text=True, 
-                                      timeout=30, encoding='utf-8', errors='replace')
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+                                    timeout=30, encoding='utf-8', errors='replace')
 
                 # Show realistic command output
                 print(f"\n💻 {self.player_name}@hacking-target:~$ {cmd}")
-                
-                if result.stdout:
-                    print("📄 AUSGABE:")
-                    print(result.stdout)
-                elif result.stderr:
-                    print("⚠️  FEHLER:")
-                    print(result.stderr)
+
+                # Enhanced curl command handling with real server communication
+                if "curl" in cmd.lower() and ("127.0.0.1:5000" in cmd or "localhost:5000" in cmd):
+                    server_response = self.execute_curl_command(cmd)
+                    if server_response:
+                        print("📄 SERVER ANTWORT:")
+                        print(server_response)
+
+                        # Check for success indicators in real server response
+                        if self.check_level_success(5, server_response, cmd):
+                            print("\n🎉 ERFOLG! Du hast den Encryption-Key gefunden!")
+                            print("🏆 Level 5 abgeschlossen! +300 Punkte")
+                            print("\n📚 WAS DU GELERNT HAST:")
+                            print("   • Memory Analysis mit Volatility")
+                            print("   • Network Traffic Analysis")
+                            print("   • Password Cracking mit John/Hashcat")
+                            print("   • Cryptography und Encryption")
+                            print("   • Malware Analysis")
+                            print("   • Digital Forensics")
+                            print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                            print("   • Starke Verschlüsselung verwenden (AES-256)")
+                            print("   • Key-Management-Systeme (HSM) einsetzen")
+                            print("   • Regular Security Audits durchführen")
+                            print("   • Logging und Monitoring aktivieren")
+                            print("   • Incident Response Plan bereithalten")
+                            self.score += 300
+                            break
+                    else:
+                        print("📄 (Keine Antwort vom Server)")
                 else:
-                    # Show realistic "no output" for different command types
-                    if "curl" in cmd.lower():
-                        print("📄 (Keine Ausgabe)")
-                    elif "nmap" in cmd.lower():
-                        print("📄 Starting Nmap scan...")
-                        print("📄 Nmap scan report for 127.0.0.1")
-                        print("📄 Host is up (0.0001s latency).")
-                        print("📄 Not shown: 999 closed ports")
-                        print("📄 PORT     STATE SERVICE")
-                        print("📄 5000/tcp open  http")
-                    elif "netstat" in cmd.lower():
-                        print("📄 Active Connections")
-                        print("📄 Proto  Local Address          Foreign Address        State")
-                        print("📄 TCP    127.0.0.1:5000         0.0.0.0:0              LISTENING")
-                    elif "volatility" in cmd.lower():
-                        print("📄 Volatility Foundation Volatility Framework 2.6")
-                        print("📄 No suitable address space mapping found")
-                    elif "strings" in cmd.lower():
-                        print("📄 /usr/bin/strings: 'file.txt': No such file or directory")
+                    # Handle non-curl commands
+                    if result.stdout:
+                        print("📄 AUSGABE:")
+                        print(result.stdout)
+                    elif result.stderr and result.stderr.strip() and not result.stderr.startswith('  % Total'):
+                        print("⚠️  FEHLER:")
+                        print(result.stderr)
                     else:
                         print("📄 (Keine Ausgabe)")
 
-                # Check for various success indicators
-                success_indicators = [
-                    target_value in (result.stdout or ""),
-                    "encryption" in (result.stdout or "").lower(),
-                    "key" in (result.stdout or "").lower(),
-                    "password" in (result.stdout or "").lower(),
-                    "cracked" in (result.stdout or "").lower(),
-                    "decrypted" in (result.stdout or "").lower(),
-                    "forensic" in (result.stdout or "").lower(),
-                    "process" in (result.stdout or "").lower(),
-                    "tasklist" in (result.stdout or "").lower(),
-                    "netstat" in (result.stdout or "").lower()
-                ]
+                    # Check for success in non-curl command output
+                    if self.check_level_success(5, result.stdout or "", cmd):
+                        print("\n🎉 ERFOLG! Du hast den Encryption-Key gefunden!")
+                        print("🏆 Level 5 abgeschlossen! +300 Punkte")
+                        print("\n📚 WAS DU GELERNT HAST:")
+                        print("   • Memory Analysis mit Volatility")
+                        print("   • Network Traffic Analysis")
+                        print("   • Password Cracking mit John/Hashcat")
+                        print("   • Cryptography und Encryption")
+                        print("   • Malware Analysis")
+                        print("   • Digital Forensics")
+                        print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                        print("   • Starke Verschlüsselung verwenden (AES-256)")
+                        print("   • Key-Management-Systeme (HSM) einsetzen")
+                        print("   • Regular Security Audits durchführen")
+                        print("   • Logging und Monitoring aktivieren")
+                        print("   • Incident Response Plan bereithalten")
+                        self.score += 300
+                        break
 
                 # Check if user directly entered the target value
                 if cmd.strip() == target_value:
                     print(f"\n🎉 ERFOLG! Du hast den Encryption-Key direkt eingegeben: {target_value}")
-                    print("🏆 Level 5 abgeschlossen! +300 Punkte")
-                    print("\n📚 WAS DU GELERNT HAST:")
-                    print("   • Memory Analysis mit Volatility")
-                    print("   • Network Traffic Analysis")
-                    print("   • Password Cracking mit John/Hashcat")
-                    print("   • Cryptography und Encryption")
-                    print("   • Malware Analysis")
-                    print("   • Digital Forensics")
-                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
-                    print("   • Starke Verschlüsselung verwenden (AES-256)")
-                    print("   • Key-Management-Systeme (HSM) einsetzen")
-                    print("   • Regular Security Audits durchführen")
-                    print("   • Logging und Monitoring aktivieren")
-                    print("   • Incident Response Plan bereithalten")
-                    self.score += 300
-                    break
-
-                if any(success_indicators):
-                    print("\n🎉 ERFOLG! Du hast den Encryption-Key gefunden!")
                     print("🏆 Level 5 abgeschlossen! +300 Punkte")
                     print("\n📚 WAS DU GELERNT HAST:")
                     print("   • Memory Analysis mit Volatility")

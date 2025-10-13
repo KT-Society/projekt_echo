@@ -1,0 +1,32 @@
+# robots.txt for https://127.0.0.1:5000
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /private/
+Disallow: /backup/
+Disallow: /logs/
+Disallow: /config/
+Disallow: /database/
+Disallow: /.env
+Disallow: /.env.local
+Disallow: /debug
+Disallow: /test
+Disallow: /api/internal/
+Disallow: /temp/
+Disallow: /uploads/
+Disallow: /.git/
+Disallow: /node_modules/
+Disallow: /vendor/
+
+# Allow specific educational endpoints
+Allow: /login
+Allow: /api/
+Allow: /docs/
+Allow: /help
+
+# Crawl delay for educational purposes
+Crawl-delay: 2
+
+# Sitemap location
+Sitemap: https://127.0.0.1:5000/sitemap.xml
