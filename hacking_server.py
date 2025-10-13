@@ -318,6 +318,52 @@ def documents():
 
     return render_template('documents.html', documents=docs)
 
+@app.route('/sql-test', methods=['GET', 'POST'])
+def sql_test():
+    """Advanced SQL injection testing endpoint"""
+    if request.method == 'POST':
+        query = request.form.get('query', '')
+        
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+        
+        try:
+            cursor.execute(query)
+            results = cursor.fetchall()
+            conn.close()
+            
+            return f"""
+            <h2>SQL Query Results</h2>
+            <p><strong>Query:</strong> {query}</p>
+            <p><strong>Results:</strong></p>
+            <pre>{results}</pre>
+            <br><a href='/sql-test'>Try another query</a>
+            """
+        except sqlite3.Error as e:
+            conn.close()
+            return f"""
+            <h2>SQL Error</h2>
+            <p><strong>Query:</strong> {query}</p>
+            <p><strong>Error:</strong> {str(e)}</p>
+            <br><a href='/sql-test'>Try another query</a>
+            """
+    
+    return '''
+    <h2>SQL Injection Testing</h2>
+    <form method="post">
+        <textarea name="query" placeholder="Enter SQL query" rows="5" cols="80"></textarea><br><br>
+        <input type="submit" value="Execute Query">
+    </form>
+    <h3>Example Payloads:</h3>
+    <ul>
+        <li><code>SELECT * FROM users WHERE username='admin' OR '1'='1'</code></li>
+        <li><code>SELECT * FROM users UNION SELECT 1,2,3,4,5</code></li>
+        <li><code>SELECT * FROM users WHERE username='admin'; DROP TABLE users; --</code></li>
+        <li><code>SELECT * FROM users WHERE username='admin' OR 1=1#</code></li>
+        <li><code>SELECT * FROM users WHERE username='admin' OR 1=1 --</code></li>
+    </ul>
+    '''
+
 @app.route('/api/documents/<filename>')
 def get_document(filename):
     """API endpoint to retrieve documents"""
@@ -436,7 +482,18 @@ def api_users():
     
     return jsonify({
         'users': [{'id': u[0], 'username': u[1], 'email': u[2], 'role': u[3]} for u in users],
-        'total': len(users)
+        'total': len(users),
+        'database_info': {
+            'type': 'SQLite',
+            'version': '3.36.0',
+            'tables': ['users', 'documents', 'comments', 'game_sessions'],
+            'columns': {
+                'users': ['id', 'username', 'password_hash', 'email', 'role', 'created_at'],
+                'documents': ['id', 'filename', 'content', 'classification', 'created_at'],
+                'comments': ['id', 'username', 'comment', 'created_at'],
+                'game_sessions': ['id', 'session_id', 'player_name', 'current_level', 'score', 'created_at']
+            }
+        }
     })
 
 @app.route('/admin/actions', methods=['POST'])
