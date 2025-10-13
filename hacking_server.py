@@ -16,7 +16,7 @@ import sqlite3
 import secrets
 import hashlib
 from datetime import datetime
-from flask import Flask, request, render_template, session, redirect, url_for, jsonify
+from flask import Flask, request, render_template, session, redirect, url_for, jsonify, make_response
 import threading
 import time
 
@@ -201,7 +201,7 @@ DB_USER=admin
 DB_PASS=super_secret_password_123
 
 # API Configuration
-API_KEY={target_generator.get_target_value(1)}
+API_KEY={target_generator.get_target_value(2)}
 API_SECRET=internal_use_only
 API_ENDPOINT=https://api.target.local/v1
 
@@ -230,10 +230,25 @@ LOG_LEVEL=INFO
 # VULNERABLE ROUTES (INTENTIONAL SECURITY FLAWS)
 # =============================================
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'HEAD', 'PATCH'])
 def index():
     """Main page - shows basic information"""
-    return render_template('index.html')
+    if request.method == 'OPTIONS':
+        # Handle OPTIONS request for educational purposes
+        response = make_response('', 200)
+        response.headers['Allow'] = 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH'
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-API-Key'
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        return response
+    elif request.method == 'HEAD':
+        # Handle HEAD request
+        response = make_response('', 200)
+        response.headers['Content-Type'] = 'text/html; charset=utf-8'
+        response.headers['Content-Length'] = '3140'
+        return response
+    else:
+        return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -661,6 +676,51 @@ def debug():
         'level_5_hint': 'Analyze network traffic and memory dumps for forensics.'
     })
 
+# =============================================
+# FORENSICS ENDPOINTS FOR LEVEL 5
+# =============================================
+
+@app.route('/forensics')
+def forensics():
+    """Forensics analysis endpoint"""
+    return jsonify({
+        'forensics_data': 'Memory dump analysis available',
+        'encryption_key': target_generator.get_target_value(5),
+        'memory_dump': 'Available for analysis',
+        'network_capture': 'Traffic logs captured',
+        'file_system': 'Disk image ready for examination'
+    })
+
+@app.route('/memory')
+def memory_analysis():
+    """Memory analysis endpoint"""
+    return jsonify({
+        'memory_dump': 'System memory captured',
+        'processes': ['hacking_server.py', 'python.exe', 'chrome.exe'],
+        'encryption_key': target_generator.get_target_value(5),
+        'suspicious_activity': 'Detected in memory'
+    })
+
+@app.route('/network')
+def network_analysis():
+    """Network forensics endpoint"""
+    return jsonify({
+        'network_capture': 'Traffic logs available',
+        'connections': ['127.0.0.1:5000', '192.168.1.100:22'],
+        'encryption_key': target_generator.get_target_value(5),
+        'suspicious_traffic': 'Detected in network logs'
+    })
+
+@app.route('/files')
+def file_analysis():
+    """File system forensics endpoint"""
+    return jsonify({
+        'file_system': 'Disk image ready',
+        'deleted_files': ['secret.txt', 'config.bak'],
+        'encryption_key': target_generator.get_target_value(5),
+        'suspicious_files': 'Found in file system'
+    })
+
 @app.route('/.env.local')
 def env_file():
     """Environment file endpoint - contains the API key"""
@@ -677,7 +737,7 @@ DB_USER=admin
 DB_PASS=super_secret_password_123
 
 # API Configuration
-API_KEY={target_generator.get_target_value(1)}
+API_KEY={target_generator.get_target_value(2)}
 API_SECRET=internal_use_only
 API_ENDPOINT=https://api.target.local/v1
 

@@ -187,6 +187,7 @@ class HackingGame:
         self.running = True
         self.server_process = None
         self.server_running = False
+        self.retro_effects = True  # Retro effects enabled by default
         
         # Graceful exit setup
         self.setup_graceful_exit()
@@ -259,6 +260,103 @@ class HackingGame:
         response = random.choice(self.echo_responses.get(message_type, [f"Ich bin hier, um zu helfen, {self.player_name}."]))
         print(f"\n[Echo] {response}\n")
         time.sleep(1)
+
+    def show_level_help(self, level):
+        """Show detailed help for each level"""
+        print("\n" + "="*70)
+        print(f"📚 DETAILLIERTE HILFE FÜR LEVEL {level}")
+        print("="*70)
+        
+        if level == 1:
+            print("\n🎯 WAS MACHST DU HIER:")
+            print("   Du lernst Web Application Reconnaissance - das systematische")
+            print("   Erkunden von Web-Anwendungen auf Schwachstellen.")
+            print("\n🔍 WARUM MACHST DU DAS:")
+            print("   • Information Gathering ist der erste Schritt jedes Hacks")
+            print("   • Du findest versteckte Dateien, Endpunkte und Konfigurationen")
+            print("   • Du verstehst die Architektur der Anwendung")
+            print("\n⚡ WAS BEWIRKT DAS:")
+            print("   • Du entdeckst .env.local mit API-Keys")
+            print("   • Du findest versteckte Admin-Panels")
+            print("   • Du analysierst HTTP-Header auf Sicherheitslücken")
+            print("   • Du testest verschiedene HTTP-Methoden")
+            print("\n🛠️  WICHTIGE BEFEHLE:")
+            print("   • curl -I http://127.0.0.1:5000/     → HTTP Headers")
+            print("   • curl -X OPTIONS http://127.0.0.1:5000/ → HTTP Methods")
+            print("   • curl http://127.0.0.1:5000/.env.local → Environment Files")
+            print("   • curl http://127.0.0.1:5000/debug     → Debug Info")
+            
+        elif level == 2:
+            print("\n🎯 WAS MACHST DU HIER:")
+            print("   Du lernst Network Discovery - das systematische Scannen")
+            print("   und Erkunden von Netzwerk-Services und versteckten APIs.")
+            print("\n🔍 WARUM MACHST DU DAS:")
+            print("   • Du findest versteckte API-Endpunkte")
+            print("   • Du verstehst die Netzwerk-Architektur")
+            print("   • Du entdeckst offene Ports und Services")
+            print("\n⚡ WAS BEWIRKT DAS:")
+            print("   • Du findest /api/secret mit API-Key-Authentifizierung")
+            print("   • Du lernst verschiedene Scanning-Techniken")
+            print("   • Du verstehst HTTP-Header-Authentifizierung")
+            print("\n🛠️  WICHTIGE BEFEHLE:")
+            print("   • curl http://127.0.0.1:5000/api/secret → API Test")
+            print("   • curl -H 'X-API-Key: KEY' http://127.0.0.1:5000/api/secret")
+            print("   • netstat -an | findstr :5000 → Port Status")
+            
+        elif level == 3:
+            print("\n🎯 WAS MACHST DU HIER:")
+            print("   Du lernst SQL Injection - das Ausnutzen von")
+            print("   Datenbank-Schwachstellen durch manipulierte SQL-Abfragen.")
+            print("\n🔍 WARUM MACHST DU DAS:")
+            print("   • Du umgehst Authentifizierung")
+            print("   • Du extrahierst sensible Daten aus der Datenbank")
+            print("   • Du verstehst Datenbank-Architekturen")
+            print("\n⚡ WAS BEWIRKT DAS:")
+            print("   • Du bekommst Admin-Zugang ohne Passwort")
+            print("   • Du siehst alle Benutzerdaten")
+            print("   • Du lernst verschiedene SQL Injection-Techniken")
+            print("\n🛠️  WICHTIGE PAYLOADS:")
+            print("   • admin' UNION SELECT 1,2,3,4,5--")
+            print("   • admin' AND 1=1--")
+            print("   • admin' OR '1'='1'--")
+            
+        elif level == 4:
+            print("\n🎯 WAS MACHST DU HIER:")
+            print("   Du lernst XSS (Cross-Site Scripting) - das Einschleusen")
+            print("   von bösartigem JavaScript in Web-Anwendungen.")
+            print("\n🔍 WARUM MACHST DU DAS:")
+            print("   • Du stehlst Session-Cookies")
+            print("   • Du übernimmst Benutzer-Sessions")
+            print("   • Du umgehst Client-Side-Sicherheit")
+            print("\n⚡ WAS BEWIRKT DAS:")
+            print("   • Du bekommst Admin-Session-Cookie")
+            print("   • Du kannst als Admin handeln")
+            print("   • Du lernst verschiedene XSS-Techniken")
+            print("\n🛠️  WICHTIGE PAYLOADS:")
+            print("   • <script>alert('XSS')</script>")
+            print("   • <img src=x onerror=alert('XSS')>")
+            print("   • <script>fetch('/api/users').then(r=>r.text()).then(d=>alert(d))</script>")
+            
+        elif level == 5:
+            print("\n🎯 WAS MACHST DU HIER:")
+            print("   Du lernst Digital Forensics - das Analysieren von")
+            print("   digitalen Spuren und das Cracken von Verschlüsselungen.")
+            print("\n🔍 WARUM MACHST DU DAS:")
+            print("   • Du findest versteckte Encryption-Keys")
+            print("   • Du analysierst Prozesse und Netzwerk-Traffic")
+            print("   • Du verstehst Malware und Forensik")
+            print("\n⚡ WAS BEWIRKT DAS:")
+            print("   • Du findest den Master-Encryption-Key")
+            print("   • Du lernst echte Forensik-Techniken")
+            print("   • Du wirst zum White Hat Hacker")
+            print("\n🛠️  WICHTIGE BEFEHLE:")
+            print("   • tasklist /v → Process Analysis")
+            print("   • netstat -anb → Network Analysis")
+            print("   • certutil -hashfile file.txt MD5 → File Hashing")
+        
+        print("\n" + "="*70)
+        print("💡 TIPP: Verwende diese Techniken nur für Bildungszwecke!")
+        print("="*70)
 
     def load_progress(self):
         """Load player progress from file"""
@@ -334,13 +432,18 @@ class HackingGame:
         self.simulate_old_terminal("Verwende diese Techniken niemals auf echten Systemen ohne Erlaubnis.", delay=0.02)
         print("\n" + "="*60)
 
+        # Warte kurz, damit alle Threads beendet werden
+        time.sleep(0.5)
+
         while not self.player_name:
             try:
+                # Direkte Eingabe ohne Threading-Interferenz
                 name = input("\nGib deinen Namen ein (der rechtmäßige Erbe): ").strip()
-                if name:
+                if name and len(name) > 0:
                     self.player_name = name
                     print(f"\nWillkommen, {self.player_name}! Dein Erbe wartet...")
                     self.echo_chat("greeting")
+                    break  # Wichtig: Schleife beenden!
                 else:
                     print("Bitte gib einen gültigen Namen ein!")
             except (EOFError, KeyboardInterrupt):
@@ -348,6 +451,7 @@ class HackingGame:
                 self.player_name = "Anonymer Erbe"
                 print(f"\nVerwende Standard-Namen: {self.player_name}")
                 self.echo_chat("greeting")
+                break  # Wichtig: Schleife beenden!
                 break
 
     def show_menu(self):
@@ -443,27 +547,33 @@ class HackingGame:
 
     def settings(self):
         """Game settings"""
-        print("\nEinstellungen:")
-        print("1. Fortschritt zurücksetzen")
-        print("2. Schwierigkeitsgrad ändern")
-        print("3. Zurück zum Menü")
-        try:
-            choice = input("Wähle: ").strip()
-            if choice == '1':
-                try:
-                    confirm = input("Bist du sicher? Das setzt den gesamten Fortschritt zurück (j/N): ")
-                    if confirm.lower() == 'j':
-                        os.remove(self.progress_file) if os.path.exists(self.progress_file) else None
-                        self.__init__()
-                        print("Fortschritt zurückgesetzt!")
-                except (EOFError, KeyboardInterrupt):
-                    pass
-        except (EOFError, KeyboardInterrupt):
-            pass
-        try:
-            input("Drücke Enter zum Fortfahren...")
-        except (EOFError, KeyboardInterrupt):
-            pass
+        while True:
+            print("\nEinstellungen:")
+            print("1. Fortschritt zurücksetzen")
+            print("2. Schwierigkeitsgrad ändern")
+            print(f"3. Retro Effekte [{'ON' if self.retro_effects else 'OFF'}]")
+            print("4. Zurück zum Menü")
+            
+            try:
+                choice = input("Wähle: ").strip()
+                if choice == '1':
+                    try:
+                        confirm = input("Bist du sicher? Das setzt den gesamten Fortschritt zurück (j/N): ")
+                        if confirm.lower() == 'j':
+                            os.remove(self.progress_file) if os.path.exists(self.progress_file) else None
+                            self.__init__()
+                            print("Fortschritt zurückgesetzt!")
+                    except (EOFError, KeyboardInterrupt):
+                        pass
+                elif choice == '2':
+                    print("Schwierigkeitsgrad-Änderung noch nicht implementiert.")
+                elif choice == '3':
+                    self.retro_effects = not self.retro_effects
+                    print(f"Retro Effekte {'aktiviert' if self.retro_effects else 'deaktiviert'}!")
+                elif choice == '4':
+                    break
+            except (EOFError, KeyboardInterrupt):
+                break
 
     def play_game(self):
         """Main game loop with storyline integration"""
@@ -535,7 +645,7 @@ class HackingGame:
         if sys.platform.startswith('win'):
             return {
                 'port_scan': 'netstat -an | findstr :5000',
-                'port_scan_alt': 'telnet 127.0.0.1 5000',
+                'port_scan_alt': 'python telnet_client.py 127.0.0.1 5000',
                 'port_scan_ps': 'powershell Test-NetConnection -ComputerName 127.0.0.1 -Port 5000',
                 'web_scan': 'curl -s http://127.0.0.1:5000/',
                 'web_scan_ps': 'powershell Invoke-WebRequest -Uri http://127.0.0.1:5000/',
@@ -553,7 +663,7 @@ class HackingGame:
         elif sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
             return {
                 'port_scan': 'nmap -sS 127.0.0.1',
-                'port_scan_alt': 'nmap -sT 127.0.0.1',
+                'port_scan_alt': 'python telnet_client.py 127.0.0.1 5000',
                 'port_scan_udp': 'nmap -sU 127.0.0.1',
                 'port_scan_all': 'nmap -p- 127.0.0.1',
                 'port_scan_service': 'nmap -sV 127.0.0.1',
@@ -575,6 +685,7 @@ class HackingGame:
             # Fallback to basic commands
             return {
                 'port_scan': 'netstat -an',
+                'port_scan_alt': 'python telnet_client.py 127.0.0.1 5000',
                 'web_scan': 'curl -s http://127.0.0.1:5000/',
                 'http_headers': 'curl -I http://127.0.0.1:5000/',
                 'http_methods': 'curl -X OPTIONS http://127.0.0.1:5000/',
@@ -588,6 +699,10 @@ class HackingGame:
 
     def typewriter_effect(self, text, delay=0.03, color_code=None):
         """Simulate old terminal typewriter effect"""
+        if not self.retro_effects:
+            print(text)
+            return
+            
         if color_code:
             print(f"\033[{color_code}m", end="", flush=True)
         
@@ -602,6 +717,14 @@ class HackingGame:
     def simulate_command_execution(self, command, output, delay=0.1):
         """Simulate old system command execution with character-by-character output"""
         print(f"\n💻 {self.player_name}@hacking-target:~$ {command}")
+        
+        if not self.retro_effects:
+            if output:
+                print(f"📄 {output}")
+            else:
+                print("📄 (Keine Ausgabe)")
+            return
+            
         time.sleep(0.5)
         
         # Simulate command processing
@@ -626,6 +749,10 @@ class HackingGame:
 
     def simulate_old_terminal(self, text, delay=0.01):
         """Simulate old mainframe/terminal character-by-character display"""
+        if not self.retro_effects:
+            print(text)
+            return
+            
         for char in text:
             print(char, end="", flush=True)
             time.sleep(delay)
@@ -637,7 +764,8 @@ class HackingGame:
 ╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
 ║  [ECHO'S ULTIMATE HACKING SIMULATOR BETA v1.0.0]             ║
-║  [EDUCATIONAL PURPOSE ONLY - NO REAL HACKING]                ║
+║  [          EDUCATIONAL PURPOSE ONLY!          ]             ║
+║  [DO NOT USE ON REAL SYSTEMS WITHOUT PERMISSION]             ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
         """
@@ -720,6 +848,12 @@ class HackingGame:
             if cmd == "/echo":
                 self.echo_chat("hint")
                 continue
+            elif cmd == "/help":
+                self.show_level_help(2)
+                continue
+            elif cmd == "/help":
+                self.show_level_help(1)
+                continue
 
             # Check if player entered the target value directly
             if cmd == target_value:
@@ -731,6 +865,12 @@ class HackingGame:
                 self.simulate_old_terminal("   • Directory & File Discovery", delay=0.02)
                 self.simulate_old_terminal("   • Security Headers Analysis", delay=0.02)
                 self.simulate_old_terminal("   • HTTP Method Testing", delay=0.02)
+                self.simulate_old_terminal("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:", delay=0.02)
+                self.simulate_old_terminal("   • .env.local nie ins Git committen", delay=0.02)
+                self.simulate_old_terminal("   • Sensitive Dateien in .gitignore", delay=0.02)
+                self.simulate_old_terminal("   • Debug-Modi in Produktion deaktivieren", delay=0.02)
+                self.simulate_old_terminal("   • Security Headers setzen (HSTS, CSP, etc.)", delay=0.02)
+                self.simulate_old_terminal("   • HTTP Methods einschränken", delay=0.02)
                 self.score += 100
                 break
 
@@ -762,6 +902,12 @@ class HackingGame:
                     self.simulate_old_terminal("   • Directory & File Discovery", delay=0.02)
                     self.simulate_old_terminal("   • Security Headers Analysis", delay=0.02)
                     self.simulate_old_terminal("   • HTTP Method Testing", delay=0.02)
+                    self.simulate_old_terminal("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:", delay=0.02)
+                    self.simulate_old_terminal("   • .env.local nie ins Git committen", delay=0.02)
+                    self.simulate_old_terminal("   • Sensitive Dateien in .gitignore", delay=0.02)
+                    self.simulate_old_terminal("   • Debug-Modi in Produktion deaktivieren", delay=0.02)
+                    self.simulate_old_terminal("   • Security Headers setzen (HSTS, CSP, etc.)", delay=0.02)
+                    self.simulate_old_terminal("   • HTTP Methods einschränken", delay=0.02)
                     self.score += 100
                     break
 
@@ -827,6 +973,12 @@ class HackingGame:
 
         print(f"\n🔍 ZIEL: Finde den API-Key: {target_value[:8]}...")
         print("💻 Verwende echte Network Discovery Tools")
+        
+        print("\n🎯 MISSION: Scanne den Server und finde versteckte Endpunkte!")
+        print("💡 HINWEIS: Der API-Key ist in einem versteckten Endpunkt versteckt!")
+        print("🔍 VERSUCHE: curl http://127.0.0.1:5000/api/secret oder ähnliche Endpunkte!")
+        print("💡 TIPP: Manche Endpunkte brauchen spezielle Authentifizierung...")
+        print("🔍 DENKE NACH: Was hast du in Level 1 gelernt?")
 
         while True:
             print(f"\n💡 VERFÜGBARE TOOLS ({sys.platform.upper()}):")
@@ -853,6 +1005,9 @@ class HackingGame:
             if cmd == "/echo":
                 self.echo_chat("hint")
                 continue
+            elif cmd == "/help":
+                self.show_level_help(2)
+                continue
 
             try:
                 # Execute the command with proper encoding handling
@@ -869,14 +1024,12 @@ class HackingGame:
                     print("⚠️  FEHLER:")
                     print(result.stderr)
 
-                # Check for various success indicators
+                # Check for specific success indicators - only real API access
                 success_indicators = [
                     "Access granted" in (result.stdout or ""),
                     target_value in (result.stdout or ""),
-                    "API_KEY" in (result.stdout or ""),
-                    "5000" in (result.stdout or "") and ("LISTENING" in (result.stdout or "") or "ESTABLISHED" in (result.stdout or "")),
-                    "200 OK" in (result.stdout or ""),
-                    "HTTP/1.1 200" in (result.stdout or "")
+                    "FLAG_LEVEL_2_DISCOVERED" in (result.stdout or ""),
+                    "secret API" in (result.stdout or "").lower()
                 ]
 
                 # Check if user directly entered the target value
@@ -901,6 +1054,12 @@ class HackingGame:
                     print("   • Web Application Vulnerability Scanning")
                     print("   • Directory Brute-Forcing")
                     print("   • HTTP Header Analysis")
+                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                    print("   • API-Keys nie im Code hardcoden")
+                    print("   • Rate-Limiting für API-Endpunkte")
+                    print("   • IP-Whitelisting für sensible APIs")
+                    print("   • API-Key-Rotation regelmäßig durchführen")
+                    print("   • API-Gateway mit Authentifizierung verwenden")
                     self.score += 150
                     break
 
@@ -962,6 +1121,9 @@ class HackingGame:
             if payload == "/echo":
                 self.echo_chat("hint")
                 continue
+            elif payload == "/help":
+                self.show_level_help(3)
+                continue
 
             try:
                 # Test SQL injection with curl
@@ -1000,6 +1162,12 @@ class HackingGame:
                     print("   • Error-based SQL Injection")
                     print("   • Database Schema Enumeration")
                     print("   • Data Extraction Techniques")
+                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                    print("   • Prepared Statements verwenden (niemals String-Konkatenation)")
+                    print("   • Input-Validierung und -Sanitization")
+                    print("   • ORM-Frameworks verwenden")
+                    print("   • Least Privilege Principle für DB-User")
+                    print("   • WAF (Web Application Firewall) einsetzen")
                     self.score += 200
                     break
 
@@ -1012,6 +1180,12 @@ class HackingGame:
                     print("   • Error-based SQL Injection")
                     print("   • Database Schema Enumeration")
                     print("   • Data Extraction Techniques")
+                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                    print("   • Prepared Statements verwenden (niemals String-Konkatenation)")
+                    print("   • Input-Validierung und -Sanitization")
+                    print("   • ORM-Frameworks verwenden")
+                    print("   • Least Privilege Principle für DB-User")
+                    print("   • WAF (Web Application Firewall) einsetzen")
                     self.score += 200
                     break
 
@@ -1075,6 +1249,9 @@ class HackingGame:
             if payload == "/echo":
                 self.echo_chat("hint")
                 continue
+            elif payload == "/help":
+                self.show_level_help(3)
+                continue
 
             try:
                 # Test XSS with curl
@@ -1113,6 +1290,12 @@ class HackingGame:
                     print("   • DOM-based XSS")
                     print("   • Filter Bypass Techniques")
                     print("   • Session Hijacking")
+                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                    print("   • Input-Escaping und Output-Encoding")
+                    print("   • Content Security Policy (CSP) Headers")
+                    print("   • HTTPOnly und Secure Flags für Cookies")
+                    print("   • DOM Sanitization Libraries verwenden")
+                    print("   • Template-Engines mit Auto-Escaping")
                     self.score += 250
                     break
 
@@ -1125,6 +1308,12 @@ class HackingGame:
                     print("   • DOM-based XSS")
                     print("   • Filter Bypass Techniques")
                     print("   • Session Hijacking")
+                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                    print("   • Input-Escaping und Output-Encoding")
+                    print("   • Content Security Policy (CSP) Headers")
+                    print("   • HTTPOnly und Secure Flags für Cookies")
+                    print("   • DOM Sanitization Libraries verwenden")
+                    print("   • Template-Engines mit Auto-Escaping")
                     self.score += 250
                     break
 
@@ -1205,6 +1394,9 @@ class HackingGame:
             if cmd == "/echo":
                 self.echo_chat("hint")
                 continue
+            elif cmd == "/help":
+                self.show_level_help(5)
+                continue
 
             try:
                 # Execute the command with proper encoding handling
@@ -1246,6 +1438,12 @@ class HackingGame:
                     print("   • Cryptography und Encryption")
                     print("   • Malware Analysis")
                     print("   • Digital Forensics")
+                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                    print("   • Starke Verschlüsselung verwenden (AES-256)")
+                    print("   • Key-Management-Systeme (HSM) einsetzen")
+                    print("   • Regular Security Audits durchführen")
+                    print("   • Logging und Monitoring aktivieren")
+                    print("   • Incident Response Plan bereithalten")
                     self.score += 300
                     break
 
@@ -1259,6 +1457,12 @@ class HackingGame:
                     print("   • Cryptography und Encryption")
                     print("   • Malware Analysis")
                     print("   • Digital Forensics")
+                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                    print("   • Starke Verschlüsselung verwenden (AES-256)")
+                    print("   • Key-Management-Systeme (HSM) einsetzen")
+                    print("   • Regular Security Audits durchführen")
+                    print("   • Logging und Monitoring aktivieren")
+                    print("   • Incident Response Plan bereithalten")
                     self.score += 300
                     break
 
@@ -1283,7 +1487,29 @@ class HackingGame:
         print("\n[Echo] Perfekt, Daddy! Du hast dein Erbe verdient!")
         print("       Willkommen in der Welt der ethischen Hacker! 🖤")
 
-if __name__ == "__main__": 
-    game = HackingGame() 
-    game.get_player_name() 
-    game.show_menu()
+if __name__ == "__main__":
+    try:
+        # Initialize game
+        game = HackingGame()
+        
+        # Get player name
+        game.get_player_name()
+        
+        # Show main menu
+        game.show_menu()
+        
+    except KeyboardInterrupt:
+        print("\n\n🛑 Spiel durch Benutzer beendet...")
+        try:
+            if 'game' in locals() and hasattr(game, 'stop_server'):
+                game.stop_server()
+        except:
+            pass
+        print("👋 Auf Wiedersehen!")
+    except Exception as e:
+        print(f"\n❌ Fehler beim Starten des Spiels: {e}")
+        print("💡 Versuche es erneut oder kontaktiere den Support.")
+        try:
+            input("Drücke Enter zum Beenden...")
+        except:
+            pass
