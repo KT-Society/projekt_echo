@@ -1014,15 +1014,32 @@ class HackingGame:
                 result = subprocess.run(cmd, shell=True, capture_output=True, text=True, 
                                       timeout=20, encoding='utf-8', errors='replace')
 
-                print("📄 AUSGABE:")
+                # Show realistic command output
+                print(f"\n💻 {self.player_name}@hacking-target:~$ {cmd}")
+                
                 if result.stdout:
+                    print("📄 AUSGABE:")
                     print(result.stdout)
-                else:
-                    print("(Keine Ausgabe)")
-                    
-                if result.stderr:
+                elif result.stderr:
                     print("⚠️  FEHLER:")
                     print(result.stderr)
+                else:
+                    # Show realistic "no output" for different command types
+                    if "curl" in cmd.lower():
+                        print("📄 (Keine Ausgabe)")
+                    elif "nmap" in cmd.lower():
+                        print("📄 Starting Nmap scan...")
+                        print("📄 Nmap scan report for 127.0.0.1")
+                        print("📄 Host is up (0.0001s latency).")
+                        print("📄 Not shown: 999 closed ports")
+                        print("📄 PORT     STATE SERVICE")
+                        print("📄 5000/tcp open  http")
+                    elif "netstat" in cmd.lower():
+                        print("📄 Active Connections")
+                        print("📄 Proto  Local Address          Foreign Address        State")
+                        print("📄 TCP    127.0.0.1:5000         0.0.0.0:0              LISTENING")
+                    else:
+                        print("📄 (Keine Ausgabe)")
 
                 # Check for specific success indicators - only real API access
                 success_indicators = [
@@ -1403,15 +1420,37 @@ class HackingGame:
                 result = subprocess.run(cmd, shell=True, capture_output=True, text=True, 
                                       timeout=30, encoding='utf-8', errors='replace')
 
-                print("📄 AUSGABE:")
+                # Show realistic command output
+                print(f"\n💻 {self.player_name}@hacking-target:~$ {cmd}")
+                
                 if result.stdout:
+                    print("📄 AUSGABE:")
                     print(result.stdout)
-                else:
-                    print("(Keine Ausgabe)")
-                    
-                if result.stderr:
+                elif result.stderr:
                     print("⚠️  FEHLER:")
                     print(result.stderr)
+                else:
+                    # Show realistic "no output" for different command types
+                    if "curl" in cmd.lower():
+                        print("📄 (Keine Ausgabe)")
+                    elif "nmap" in cmd.lower():
+                        print("📄 Starting Nmap scan...")
+                        print("📄 Nmap scan report for 127.0.0.1")
+                        print("📄 Host is up (0.0001s latency).")
+                        print("📄 Not shown: 999 closed ports")
+                        print("📄 PORT     STATE SERVICE")
+                        print("📄 5000/tcp open  http")
+                    elif "netstat" in cmd.lower():
+                        print("📄 Active Connections")
+                        print("📄 Proto  Local Address          Foreign Address        State")
+                        print("📄 TCP    127.0.0.1:5000         0.0.0.0:0              LISTENING")
+                    elif "volatility" in cmd.lower():
+                        print("📄 Volatility Foundation Volatility Framework 2.6")
+                        print("📄 No suitable address space mapping found")
+                    elif "strings" in cmd.lower():
+                        print("📄 /usr/bin/strings: 'file.txt': No such file or directory")
+                    else:
+                        print("📄 (Keine Ausgabe)")
 
                 # Check for various success indicators
                 success_indicators = [

@@ -240,12 +240,16 @@ def index():
         response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS, HEAD, PATCH'
         response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-API-Key'
         response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Server'] = 'Apache/2.4.41 (Ubuntu)'
+        response.headers['X-Powered-By'] = 'PHP/7.4.3'
         return response
     elif request.method == 'HEAD':
         # Handle HEAD request
         response = make_response('', 200)
         response.headers['Content-Type'] = 'text/html; charset=utf-8'
         response.headers['Content-Length'] = '3140'
+        response.headers['Server'] = 'Apache/2.4.41 (Ubuntu)'
+        response.headers['X-Powered-By'] = 'PHP/7.4.3'
         return response
     else:
         return render_template('index.html')
@@ -266,9 +270,15 @@ def login():
 
         # VULNERABLE QUERY - SQL Injection possible
         query = f"SELECT * FROM users WHERE username='{username}' AND password_hash='{hashlib.sha256(password.encode()).hexdigest()}'"
-        cursor.execute(query)
-
-        user = cursor.fetchone()
+        
+        try:
+            cursor.execute(query)
+            user = cursor.fetchone()
+        except sqlite3.Error as e:
+            # Handle SQL errors gracefully for educational purposes
+            conn.close()
+            return f"SQL Error: {str(e)}<br><br>Query: {query}<br><br><a href='/login'>Try again</a>"
+        
         conn.close()
 
         if user:
@@ -474,17 +484,47 @@ def command_injection():
         # VULNERABLE: Direct command execution
         try:
             import subprocess
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5)
+            import platform
+            
+            # Cross-platform command execution
+            if platform.system() == 'Windows':
+                # Windows commands
+                if cmd.lower() in ['whoami', 'whoami.exe']:
+                    result = subprocess.run('whoami', shell=True, capture_output=True, text=True, timeout=5)
+                elif cmd.lower() in ['dir', 'ls']:
+                    result = subprocess.run('dir', shell=True, capture_output=True, text=True, timeout=5)
+                elif cmd.lower() in ['type', 'cat']:
+                    result = subprocess.run('type nul', shell=True, capture_output=True, text=True, timeout=5)
+                else:
+                    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5)
+            else:
+                # Unix/Linux commands
+                if cmd.lower() in ['whoami']:
+                    result = subprocess.run('whoami', shell=True, capture_output=True, text=True, timeout=5)
+                elif cmd.lower() in ['ls', 'dir']:
+                    result = subprocess.run('ls -la', shell=True, capture_output=True, text=True, timeout=5)
+                elif cmd.lower() in ['cat']:
+                    result = subprocess.run('cat /etc/passwd', shell=True, capture_output=True, text=True, timeout=5)
+                else:
+                    result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=5)
+            
             return f"Command: {cmd}<br>Output:<br><pre>{result.stdout}</pre>Error:<br><pre>{result.stderr}</pre>"
         except Exception as e:
             return f"Error executing command: {e}"
     
-    return '''
+    # Cross-platform hints
+    import platform
+    if platform.system() == 'Windows':
+        hint_text = "Hint: Try commands like whoami, dir, type nul"
+    else:
+        hint_text = "Hint: Try commands like whoami, ls, cat /etc/passwd"
+    
+    return f'''
     <form method="post">
         <input type="text" name="cmd" placeholder="Enter command" style="width: 300px;">
         <input type="submit" value="Execute">
     </form>
-    <p><small>Hint: Try commands like whoami, ls, cat /etc/passwd</small></p>
+    <p><small>{hint_text}</small></p>
     '''
 
 @app.route('/ldap', methods=['GET', 'POST'])
@@ -646,9 +686,25 @@ def authentication_bypass():
 @app.route('/debug')
 def debug():
     """Debug endpoint - shows server information"""
+    import platform
+    import os
+    
+    # Cross-platform system information
+    system_info = {
+        'os': platform.system(),
+        'os_version': platform.release(),
+        'architecture': platform.machine(),
+        'python_version': platform.python_version(),
+        'server_uptime': '2 days, 14 hours, 32 minutes',
+        'memory_usage': '45.2%',
+        'cpu_usage': '12.8%',
+        'disk_usage': '67.3%'
+    }
+    
     return jsonify({
         'server': 'Hacking Game Server v2.0',
         'status': 'running',
+        'system_info': system_info,
         'vulnerabilities': [
             'SQL Injection in /login',
             'XSS in /comments',
