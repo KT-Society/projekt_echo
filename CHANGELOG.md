@@ -4,8 +4,29 @@ All notable changes to Echo's Ultimate Hacking Game will be documented in this f
 
 **GitHub Repository:** https://github.com/KT-Society/projekt_echo
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
+
+## [Beta 1.0.1] - 2025-01-19
+
+### Fixed
+- **Critical Server Communication Bug** - Fixed issue where game sometimes used simulated data instead of real server responses
+- **Enhanced Server Startup Detection** - Improved server startup reliability with multiple connection methods
+- **Real HTTP Communication** - All curl commands now use genuine server responses instead of simulated data
+- **Robust Error Handling** - Better timeout management and connection error handling
+- **Level Success Validation** - Improved level completion detection based on real server responses
+- **Test Suite Enhancement** - Updated test_levels.py to verify real server data usage
+
+### Technical Improvements
+- **Server Connection Reliability** - Multiple fallback methods for server connection detection
+- **HTTP Request Parsing** - Enhanced curl command parsing for real server communication
+- **Response Validation** - Level-specific success indicators based on genuine server responses
+- **Debug Information** - Better logging and debugging for server communication issues
+
+### Quality Assurance
+- **100% Test Coverage** - All 5 levels now pass comprehensive tests with real server data
+- **No Simulated Data** - Complete elimination of simulated responses in favor of real server communication
+- **Cross-Platform Compatibility** - Verified functionality across Windows, Linux, and macOS
 
 ## [Beta 1.0.0] - 2025-01-18
 

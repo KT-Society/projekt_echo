@@ -33,7 +33,7 @@
 ## 🛠️ PROBLEMLÖSUNG
 
 ### "Python ist nicht installiert"
-- Gehe zu: https://www.python.org/downloads/
+- Gehe zu: http://www.python.org/downloads/
 - Lade Python herunter und installiere es
 - **WICHTIG:** Aktiviere "Add Python to PATH"!
 

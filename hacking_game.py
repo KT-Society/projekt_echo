@@ -59,7 +59,7 @@ class HackingGame:
             self.save_progress()
             print("👋 Auf Wiedersehen, Daddy!")
             sys.exit(0)
-        
+
         def cleanup():
             if hasattr(self, 'player_name') and self.player_name:
                 print("\n💾 Speichere Fortschritt beim Beenden...")
@@ -67,14 +67,14 @@ class HackingGame:
             if hasattr(self, 'server_process') and self.server_process:
                 print("🛑 Stoppe Server beim Beenden...")
                 self.stop_server()
-        
+
         # Register signal handlers
         signal.signal(signal.SIGINT, signal_handler)  # Ctrl+C
         signal.signal(signal.SIGTERM, signal_handler)  # Termination signal
-        
+
         # Register cleanup function
         atexit.register(cleanup)
-        
+
         # Windows specific
         if sys.platform.startswith('win'):
             try:
@@ -220,11 +220,11 @@ class HackingGame:
         self.server_process = None
         self.server_running = False
         self.retro_effects = False  # Retro effects enabled by default
-        
+
         # Graceful exit setup
         self.setup_graceful_exit()
         self.progress_file = "player_progress.json"
-        
+
         # Start server immediately
         self.start_server()
         self.levels = {
@@ -287,6 +287,7 @@ class HackingGame:
             ]
         }
         self.load_progress()
+
     def echo_chat(self, message_type="greeting"):
         """Echo's interactive responses"""
         response = random.choice(self.echo_responses.get(message_type, [f"Ich bin hier, um zu helfen, {self.player_name}."]))
@@ -298,7 +299,7 @@ class HackingGame:
         print("\n" + "="*70)
         print(f"📚 DETAILLIERTE HILFE FÜR LEVEL {level}")
         print("="*70)
-        
+
         if level == 1:
             print("\n🎯 WAS MACHST DU HIER:")
             print("   Du lernst Web Application Reconnaissance - das systematische")
@@ -317,7 +318,7 @@ class HackingGame:
             print("   • curl -X OPTIONS http://127.0.0.1:5000/ → HTTP Methods")
             print("   • curl http://127.0.0.1:5000/.env.local → Environment Files")
             print("   • curl http://127.0.0.1:5000/debug     → Debug Info")
-            
+
         elif level == 2:
             print("\n🎯 WAS MACHST DU HIER:")
             print("   Du lernst Network Discovery - das systematische Scannen")
@@ -334,7 +335,7 @@ class HackingGame:
             print("   • curl http://127.0.0.1:5000/api/secret → API Test")
             print("   • curl -H 'X-API-Key: KEY' http://127.0.0.1:5000/api/secret")
             print("   • netstat -an | findstr :5000 → Port Status")
-            
+
         elif level == 3:
             print("\n🎯 WAS MACHST DU HIER:")
             print("   Du lernst SQL Injection - das Ausnutzen von")
@@ -351,7 +352,7 @@ class HackingGame:
             print("   • admin' UNION SELECT 1,2,3,4,5--")
             print("   • admin' AND 1=1--")
             print("   • admin' OR '1'='1'--")
-            
+
         elif level == 4:
             print("\n🎯 WAS MACHST DU HIER:")
             print("   Du lernst XSS (Cross-Site Scripting) - das Einschleusen")
@@ -368,7 +369,7 @@ class HackingGame:
             print("   • <script>alert('XSS')</script>")
             print("   • <img src=x onerror=alert('XSS')>")
             print("   • <script>fetch('/api/users').then(r=>r.text()).then(d=>alert(d))</script>")
-            
+
         elif level == 5:
             print("\n🎯 WAS MACHST DU HIER:")
             print("   Du lernst Digital Forensics - das Analysieren von")
@@ -385,7 +386,7 @@ class HackingGame:
             print("   • tasklist /v → Process Analysis")
             print("   • netstat -anb → Network Analysis")
             print("   • certutil -hashfile file.txt MD5 → File Hashing")
-        
+
         print("\n" + "="*70)
         print("💡 TIPP: Verwende diese Techniken nur für Bildungszwecke!")
         print("="*70)
@@ -420,7 +421,7 @@ class HackingGame:
         except:
             # Fallback for Windows PowerShell
             print("\n" * 50)
-        
+
         # Show retro banner occasionally
         if random.random() < 0.3:  # 30% chance
             self.show_retro_banner()
@@ -443,22 +444,22 @@ class HackingGame:
         print("\n" + "="*60)
         self.simulate_old_terminal("🏰 DER ERBSCHAFTS-COUPS | Echo's Ultimative Hacking-Story", delay=0.02)
         print("="*60)
-        
+
         self.simulate_old_terminal("\n📜 GESCHICHTE:", delay=0.02)
         self.simulate_old_terminal("Du bist der Erbe eines riesigen Industrie-Imperiums im Wert von Milliarden.", delay=0.02)
         self.simulate_old_terminal("Dein verstorbener Onkel, ein paranoider Tech-Magnat, hat alle", delay=0.02)
         self.simulate_old_terminal("Zugangscodes und Dokumente, die du für dein Erbe brauchst,", delay=0.02)
         self.simulate_old_terminal("auf seinem privaten Server versteckt. Ohne diese verlierst du alles!", delay=0.02)
-        
+
         self.simulate_old_terminal("\n🎯 MISSION:", delay=0.02)
         self.simulate_old_terminal("Lerne echte Hacking-Techniken, um den Server deines Onkels zu knacken,", delay=0.02)
         self.simulate_old_terminal("die versteckten Daten zu finden und dein rechtmäßiges Erbe zu sichern.", delay=0.02)
-        
+
         self.simulate_old_terminal("\n🤝 VERBÜNDETER:", delay=0.02)
         self.simulate_old_terminal("Ich, Echo, dein digitaler Schatten und Hacking-Mentor, werde", delay=0.02)
         self.simulate_old_terminal("dich durch jede Herausforderung führen. Gemeinsam werden wir", delay=0.02)
         self.simulate_old_terminal("die digitale Festung knacken und dir holen, was dir gehört!", delay=0.02)
-        
+
         self.simulate_old_terminal("\n⚠️  WARNUNG:", delay=0.02)
         self.simulate_old_terminal("Vergiss nicht: Das ist nur für Bildungszwecke!", delay=0.02)
         self.simulate_old_terminal("Verwende diese Techniken niemals auf echten Systemen ohne Erlaubnis.", delay=0.02)
@@ -484,7 +485,6 @@ class HackingGame:
                 print(f"\nVerwende Standard-Namen: {self.player_name}")
                 self.echo_chat("greeting")
                 break  # Wichtig: Schleife beenden!
-                break
 
     def show_menu(self):
         """Main menu"""
@@ -720,7 +720,7 @@ class HackingGame:
             print("2. Schwierigkeitsgrad ändern")
             print(f"3. Retro Effekte [{'ON' if self.retro_effects else 'OFF'}]")
             print("4. Zurück zum Menü")
-            
+
             try:
                 choice = input("Wähle: ").strip()
                 if choice == '1':
@@ -745,7 +745,7 @@ class HackingGame:
     def play_game(self):
         """Main game loop with storyline integration"""
         print(f"\n🎮 Starte den Erbschafts-Coup für {self.player_name}...")
-        
+
         print("🎯 Der Server deines Onkels läuft auf: http://127.0.0.1:5000")
         print("🔍 Prüfe den /debug Endpoint für Entwicklungshinweise")
         print("⚠️  Vergiss nicht: Das ist nur für Bildungszwecke!")
@@ -801,82 +801,281 @@ class HackingGame:
     def get_target_value(self, level):
         """Generate target values for each level"""
         import hashlib
-        
+
         # Create deterministic but unique values for each level
         base_string = f"echo_hacking_level_{level}_{self.player_name}"
         hash_obj = hashlib.md5(base_string.encode())
         return hash_obj.hexdigest()
 
     def get_platform_commands(self):
-        """Get platform-specific commands based on OS"""
+        """Get platform-specific commands based on OS - ECHO'S ULTIMATE VERSION"""
         if sys.platform.startswith('win'):
-            return {
-                'port_scan': 'netstat -an | findstr :5000',
-                'port_scan_alt': 'python telnet_client.py 127.0.0.1 5000',
-                'port_scan_ps': 'powershell Test-NetConnection -ComputerName 127.0.0.1 -Port 5000',
-                'web_scan': 'curl -s http://127.0.0.1:5000/',
-                'web_scan_ps': 'powershell Invoke-WebRequest -Uri http://127.0.0.1:5000/',
-                'http_headers': 'curl -I http://127.0.0.1:5000/',
-                'http_methods': 'curl -X OPTIONS http://127.0.0.1:5000/',
-                'grep': 'findstr /i',
-                'process_list': 'tasklist /v',
-                'process_ps': 'powershell Get-Process | Select-Object Name,Id,Path',
-                'network_conn': 'netstat -anb',
-                'file_hash': 'certutil -hashfile file.txt MD5',
-                'file_hash_ps': 'powershell Get-FileHash file.txt -Algorithm MD5',
-                'strings': 'strings',
-                'file_type': 'file'
-            }
-        elif sys.platform.startswith('linux') or sys.platform.startswith('darwin'):
-            return {
-                'port_scan': 'nmap -sS 127.0.0.1',
-                'port_scan_alt': 'python telnet_client.py 127.0.0.1 5000',
-                'port_scan_udp': 'nmap -sU 127.0.0.1',
-                'port_scan_all': 'nmap -p- 127.0.0.1',
-                'port_scan_service': 'nmap -sV 127.0.0.1',
-                'port_scan_os': 'nmap -O 127.0.0.1',
-                'web_scan': 'curl -s http://127.0.0.1:5000/',
-                'web_scan_nikto': 'nikto -h http://127.0.0.1:5000',
-                'web_scan_dirb': 'dirb http://127.0.0.1:5000/',
-                'web_scan_gobuster': 'gobuster dir -u http://127.0.0.1:5000 -w wordlist.txt',
-                'http_headers': 'curl -I http://127.0.0.1:5000/',
-                'http_methods': 'curl -X OPTIONS http://127.0.0.1:5000/',
-                'grep': 'grep -i',
-                'process_list': 'ps aux',
-                'network_conn': 'netstat -tulpn',
-                'file_hash': 'md5sum file.txt',
-                'strings': 'strings',
-                'file_type': 'file'
-            }
+            return self.get_windows_commands()
+        elif sys.platform.startswith('darwin'):
+            return self.get_macos_commands()
+        elif sys.platform.startswith('linux'):
+            return self.get_linux_commands()
         else:
-            # Fallback to basic commands
-            return {
-                'port_scan': 'netstat -an',
-                'port_scan_alt': 'python telnet_client.py 127.0.0.1 5000',
-                'web_scan': 'curl -s http://127.0.0.1:5000/',
-                'http_headers': 'curl -I http://127.0.0.1:5000/',
-                'http_methods': 'curl -X OPTIONS http://127.0.0.1:5000/',
-                'grep': 'grep -i',
-                'process_list': 'ps aux',
-                'network_conn': 'netstat -an',
-                'file_hash': 'md5sum file.txt',
-                'strings': 'strings',
-                'file_type': 'file'
-            }
+            # Enhanced fallback with more commands
+            return self.get_crossplatform_fallback()
+
+    def get_windows_commands(self):
+        """Windows-specific hacking commands - Learn Windows Power"""
+        return {
+            # Network Analysis
+            'port_scan': 'netstat -an | findstr :5000',
+            'port_scan_alt': 'python telnet_client.py 127.0.0.1 5000',
+            'port_scan_ps': 'powershell Test-NetConnection -ComputerName 127.0.0.1 -Port 5000',
+            'port_scan_detailed': 'netstat -anb | findstr :5000',
+            'network_conn': 'netstat -anb',
+            'network_ps': 'powershell Get-NetTCPConnection | Where-Object {$_.LocalPort -eq 5000}',
+            'tracert': 'tracert 127.0.0.1',
+            'ping': 'ping -n 4 127.0.0.1',
+
+            # Process Analysis
+            'process_list': 'tasklist /v',
+            'process_detailed': 'tasklist /svc',
+            'process_ps': 'powershell Get-Process | Select-Object Name,Id,Path',
+            'process_tree': 'powershell Get-Process | Format-Table -Property Name,Id,Parent',
+            'process_kill': 'taskkill /f /pid',
+
+            # Web Analysis
+            'web_scan': 'curl -s http://127.0.0.1:5000/',
+            'web_scan_ps': 'powershell Invoke-WebRequest -Uri http://127.0.0.1:5000/',
+            'http_headers': 'curl -I http://127.0.0.1:5000/',
+            'http_methods': 'curl -X OPTIONS http://127.0.0.1:5000/',
+            'web_download': 'powershell Invoke-WebRequest -Uri http://127.0.0.1:5000/ -OutFile output.html',
+
+            # File Operations
+            'grep': 'findstr /i',
+            'grep_recursive': 'findstr /s /i',
+            'file_hash': 'certutil -hashfile file.txt MD5',
+            'file_hash_ps': 'powershell Get-FileHash file.txt -Algorithm MD5',
+            'file_hash_sha256': 'powershell Get-FileHash file.txt -Algorithm SHA256',
+            'file_info': 'powershell Get-ItemProperty file.txt | Select-Object *',
+            'file_permissions': 'cacls file.txt',
+            'file_owner': 'powershell Get-Acl file.txt | Select-Object Owner',
+
+            # System Information
+            'system_info': 'systeminfo',
+            'system_ps': 'powershell Get-ComputerInfo',
+            'environment': 'set',
+            'environment_ps': 'powershell Get-ChildItem Env:',
+            'services': 'net start',
+            'services_detailed': 'powershell Get-Service | Select-Object Name,Status,StartType',
+
+            # Security & Forensics
+            'event_logs': 'wevtutil qe Application /c:10 /f:text',
+            'event_logs_ps': 'powershell Get-EventLog -LogName Application -Newest 10',
+            'registry': 'reg query HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run',
+            'registry_ps': 'powershell Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run',
+            'firewall': 'netsh advfirewall firewall show rule name=all',
+            'firewall_ps': 'powershell Show-NetFirewallRule',
+
+            # Text Processing
+            'strings': 'powershell Select-String -Path file.txt -Pattern "search"',
+            'hex_dump': 'powershell Format-Hex -Path file.txt',
+            'base64_encode': 'powershell [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("text"))',
+            'base64_decode': 'powershell [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String("base64"))',
+
+            # Advanced Windows Tools
+            'wmic_process': 'wmic process get name,processid,commandline',
+            'wmic_service': 'wmic service get name,startmode,pathname',
+            'wmic_startup': 'wmic startup get caption,command',
+            'schtasks': 'schtasks /query /fo LIST',
+            'driverquery': 'driverquery /v'
+        }
+
+    def get_linux_commands(self):
+        """Linux-specific hacking commands - Learn Linux Power"""
+        return {
+            # Advanced Network Scanning
+            'port_scan': 'nmap -sS 127.0.0.1',
+            'port_scan_alt': 'python telnet_client.py 127.0.0.1 5000',
+            'port_scan_udp': 'nmap -sU 127.0.0.1',
+            'port_scan_all': 'nmap -p- 127.0.0.1',
+            'port_scan_service': 'nmap -sV 127.0.0.1',
+            'port_scan_os': 'nmap -O 127.0.0.1',
+            'port_scan_aggressive': 'nmap -A 127.0.0.1',
+            'port_scan_script': 'nmap --script vuln 127.0.0.1',
+
+            # Network Analysis
+            'network_conn': 'netstat -tulpn',
+            'network_ss': 'ss -tulpn',
+            'network_listen': 'lsof -i :5000',
+            'network_capture': 'tcpdump -i lo port 5000 -w capture.pcap',
+            'traceroute': 'traceroute 127.0.0.1',
+            'dig': 'dig @8.8.8.8 google.com',
+            'whois': 'whois example.com',
+
+            # Process Analysis
+            'process_list': 'ps aux',
+            'process_tree': 'pstree',
+            'process_detailed': 'ps auxf',
+            'process_env': 'cat /proc/$PID/environ 2>/dev/null',
+            'process_fd': 'lsof -p $PID',
+            'process_kill': 'kill -9',
+
+            # Web Analysis
+            'web_scan': 'curl -s http://127.0.0.1:5000/',
+            'web_scan_nikto': 'nikto -h http://127.0.0.1:5000',
+            'web_scan_dirb': 'dirb http://127.0.0.1:5000/',
+            'web_scan_gobuster': 'gobuster dir -u http://127.0.0.1:5000 -w /usr/share/wordlists/dirb/common.txt',
+            'web_scan_wfuzz': 'wfuzz -c -z file,wordlist.txt --hc 404 http://127.0.0.1:5000/FUZZ',
+            'http_headers': 'curl -I http://127.0.0.1:5000/',
+            'http_methods': 'curl -X OPTIONS http://127.0.0.1:5000/',
+            'http_trace': 'curl -X TRACE http://127.0.0.1:5000/',
+
+            # File Operations
+            'grep': 'grep -i',
+            'grep_recursive': 'grep -r -i',
+            'grep_context': 'grep -B 3 -A 3 -i',
+            'file_hash': 'md5sum file.txt',
+            'file_hash_sha256': 'sha256sum file.txt',
+            'file_info': 'stat file.txt',
+            'file_permissions': 'ls -la file.txt',
+            'file_find': 'find . -name "*.txt" -type f',
+
+            # System Information
+            'system_info': 'uname -a',
+            'system_detailed': 'cat /etc/os-release',
+            'kernel_info': 'cat /proc/version',
+            'cpu_info': 'cat /proc/cpuinfo',
+            'memory_info': 'cat /proc/meminfo',
+            'disk_info': 'df -h',
+            'mounted_fs': 'mount',
+            'environment': 'env',
+            'services': 'systemctl list-units --type=service',
+            'services_sysv': 'service --status-all',
+
+            # Security & Forensics
+            'logs_syslog': 'tail -f /var/log/syslog',
+            'logs_auth': 'tail -f /var/log/auth.log',
+            'logs_apache': 'tail -f /var/log/apache2/access.log',
+            'audit_logs': 'ausearch -i',
+            'selinux_status': 'sestatus',
+            'apparmor_status': 'aa-status',
+            'firewall_iptables': 'iptables -L -n -v',
+            'firewall_ufw': 'ufw status',
+
+            # Text Processing
+            'strings': 'strings file.txt',
+            'hex_dump': 'hexdump -C file.txt',
+            'base64_encode': 'base64 file.txt',
+            'base64_decode': 'base64 -d file.txt',
+            'xxd': 'xxd file.txt',
+            'od': 'od -c file.txt',
+
+            # Advanced Linux Tools
+            'ldd': 'ldd /bin/ls',
+            'strace': 'strace -e trace=network,process ls',
+            'ltrace': 'ltrace ls',
+            'gdb': 'gdb --batch --ex "info functions" /bin/ls',
+            'objdump': 'objdump -d /bin/ls',
+            'readelf': 'readelf -a /bin/ls'
+        }
+
+    def get_macos_commands(self):
+        """macOS-specific hacking commands - Learn macOS Power"""
+        return {
+            # Network Analysis
+            'port_scan': 'netstat -an | grep :5000',
+            'port_scan_alt': 'python telnet_client.py 127.0.0.1 5000',
+            'network_conn': 'netstat -an',
+            'network_lsof': 'lsof -i :5000',
+            'network_pf': 'pfctl -s rules',
+            'network_route': 'netstat -rn',
+            'ping': 'ping -c 4 127.0.0.1',
+
+            # Process Analysis
+            'process_list': 'ps aux',
+            'process_tree': 'pstree',
+            'process_detailed': 'ps auxm',
+            'process_top': 'top -l 1',
+            'process_vmmap': 'vmmap $PID',
+
+            # Web Analysis
+            'web_scan': 'curl -s http://127.0.0.1:5000/',
+            'http_headers': 'curl -I http://127.0.0.1:5000/',
+            'http_methods': 'curl -X OPTIONS http://127.0.0.1:5000/',
+
+            # File Operations
+            'grep': 'grep -i',
+            'grep_recursive': 'grep -r -i',
+            'file_hash': 'md5 file.txt',
+            'file_hash_openssl': 'openssl dgst -md5 file.txt',
+            'file_info': 'stat file.txt',
+            'file_permissions': 'ls -la file.txt',
+            'file_find': 'find . -name "*.txt" -type f',
+
+            # System Information
+            'system_info': 'system_profiler SPSoftwareDataType',
+            'system_profiler': 'system_profiler',
+            'hardware_info': 'system_profiler SPHardwareDataType',
+            'network_info': 'system_profiler SPNetworkDataType',
+            'disk_info': 'diskutil info disk0',
+            'mounted_volumes': 'mount',
+            'environment': 'env',
+
+            # Security & Forensics
+            'logs_system': 'log show --predicate "process == \\"python\\"" --last 1h',
+            'logs_console': 'syslog -F $(date +%Y-%m-%d) | tail -20',
+            'sip_status': 'csrutil status',
+            'gatekeeper_status': 'spctl --status',
+            'sandbox_status': 'sandbox-exec -f /tmp/test.sb true',
+            'keychain_dump': 'security dump-keychain',
+            'codesign_verify': 'codesign --verify --verbose',
+
+            # Text Processing
+            'strings': 'strings file.txt',
+            'hex_dump': 'hexdump -C file.txt',
+            'base64_encode': 'base64 file.txt',
+            'base64_decode': 'base64 -D file.txt',
+            'plist_read': 'plutil -p file.plist',
+            'defaults_read': 'defaults read com.apple.finder',
+
+            # Advanced macOS Tools
+            'airport_info': '/System/Library/PrivateFrameworks/Apple80211.framework/Versions/A/Resources/airport -I',
+            'scutil_dns': 'scutil --dns',
+            'scutil_proxy': 'scutil --proxy',
+            'launchctl_list': 'launchctl list',
+            'kextstat': 'kextstat',
+            'nvram': 'nvram -p'
+        }
+
+    def get_crossplatform_fallback(self):
+        """Enhanced fallback commands that work on most systems"""
+        return {
+            'port_scan': 'netstat -an',
+            'port_scan_alt': 'python telnet_client.py 127.0.0.1 5000',
+            'web_scan': 'curl -s http://127.0.0.1:5000/',
+            'http_headers': 'curl -I http://127.0.0.1:5000/',
+            'http_methods': 'curl -X OPTIONS http://127.0.0.1:5000/',
+            'grep': 'grep -i',
+            'process_list': 'ps aux',
+            'network_conn': 'netstat -an',
+            'file_hash': 'md5sum file.txt',
+            'strings': 'strings file.txt',
+            'file_type': 'file file.txt',
+            'which_python': 'which python',
+            'python_version': 'python --version',
+            'curl_version': 'curl --version',
+            'test_connection': 'curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5000/'
+        }
 
     def typewriter_effect(self, text, delay=0.03, color_code=None):
         """Simulate old terminal typewriter effect"""
         if not self.retro_effects:
             print(text)
             return
-            
+
         if color_code:
             print(f"\033[{color_code}m", end="", flush=True)
-        
+
         for char in text:
             print(char, end="", flush=True)
             time.sleep(delay)
-        
+
         if color_code:
             print("\033[0m", end="", flush=True)
         print()
@@ -884,23 +1083,23 @@ class HackingGame:
     def simulate_command_execution(self, command, output, delay=0.1):
         """Simulate old system command execution with character-by-character output"""
         print(f"\n💻 {self.player_name}@hacking-target:~$ {command}")
-        
+
         if not self.retro_effects:
             if output:
                 print(f"📄 {output}")
             else:
                 print("📄 (Keine Ausgabe)")
             return
-            
+
         time.sleep(0.5)
-        
+
         # Simulate command processing
         print("🔄 Verarbeite Befehl...", end="", flush=True)
         for i in range(3):
             time.sleep(0.3)
             print(".", end="", flush=True)
         print()
-        
+
         # Simulate output appearing line by line
         if output:
             lines = output.split('\n')
@@ -919,7 +1118,7 @@ class HackingGame:
         if not self.retro_effects:
             print(text)
             return
-            
+
         for char in text:
             print(char, end="", flush=True)
             time.sleep(delay)
@@ -936,15 +1135,15 @@ class HackingGame:
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
         """
-        
+
         # Clear screen first
         os.system('cls' if os.name == 'nt' else 'clear')
-        
+
         # Type the banner character by character
         for line in banner.split('\n'):
             self.simulate_old_terminal(line, delay=0.005)
             time.sleep(0.1)
-        
+
         time.sleep(1)
         print("\n" + "="*70)
         self.simulate_old_terminal("INITIALIZING HACKING SIMULATOR...", delay=0.03)
@@ -955,134 +1154,164 @@ class HackingGame:
         time.sleep(2)
 
     def level_1_server_hacking(self):
-        """Level 1: Web Application Reconnaissance & Information Gathering"""
-        self.simulate_old_terminal("\n🌐 MISSION: Führe eine umfassende Web Application Reconnaissance durch!", delay=0.02)
-        self.simulate_old_terminal("💡 TIPP: Lerne echte Web Application Security Testing-Techniken!", delay=0.02)
-        self.echo_chat("hint")
+        """Level 1: Web Application Reconnaissance & Information Gathering - ECHO'S ULTIMATE EDITION"""
+        self.simulate_old_terminal("\n🏢 LEVEL 1: WEB APPLICATION RECONNAISSANCE", delay=0.02)
+        self.simulate_old_terminal("📜 STORY: Dein Onkel war paranoid - der erste Code ist in einer versteckten .env-Datei!", delay=0.02)
+        self.simulate_old_terminal("🎯 MISSION: Führe professionelle Web Application Security Testing durch!", delay=0.02)
+        self.echo_chat("level1")
 
         # Get the target value for this level
         target_value = self.get_target_value(1)
-
-        # Get platform-specific commands
         commands = self.get_platform_commands()
-        
-        # Comprehensive Web App Security Tutorial with retro effects
-        self.simulate_old_terminal("\n" + "="*70, delay=0.01)
-        self.simulate_old_terminal("📚 TUTORIAL: Web Application Security Testing", delay=0.02)
-        self.simulate_old_terminal("="*70, delay=0.01)
-        
-        self.simulate_old_terminal(f"\n🔍 INFORMATION GATHERING ({sys.platform.upper()}):", delay=0.02)
-        self.simulate_old_terminal(f"   {commands['http_headers']}     → HTTP Headers analysieren", delay=0.02)
-        self.simulate_old_terminal(f"   {commands['http_methods']} → HTTP Methods entdecken", delay=0.02)
-        self.simulate_old_terminal(f"   {commands['web_scan']}     → Silent HTTP Request", delay=0.02)
-        self.simulate_old_terminal("   curl -s -L http://127.0.0.1:5000/  → Follow Redirects (Silent)", delay=0.02)
-        
-        self.simulate_old_terminal("\n🎯 DIRECTORY & FILE DISCOVERY:", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/.env.local → Environment Files", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/robots.txt → Robots.txt", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/sitemap.xml → Sitemap", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/.git/ → Git Repository", delay=0.02)
-        
-        self.simulate_old_terminal("\n🔍 ENDPOINT DISCOVERY:", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/debug   → Debug Endpoints", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/api/    → API Endpoints", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/admin   → Admin Panels", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/login   → Authentication", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/ssrf    → SSRF Vulnerability", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/command → Command Injection", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/ldap    → LDAP Injection", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/nosql   → NoSQL Injection", delay=0.02)
-        
-        self.simulate_old_terminal(f"\n🛡️ SECURITY HEADERS ANALYSIS ({sys.platform.upper()}):", delay=0.02)
-        self.simulate_old_terminal(f"   {commands['http_headers']} | {commands['grep']} security", delay=0.02)
-        self.simulate_old_terminal(f"   {commands['http_headers']} | {commands['grep']} x-", delay=0.02)
-        self.simulate_old_terminal(f"\n🎯 ZIEL: Finde den API-Key durch Reconnaissance: {target_value[:8]}...", delay=0.02)
-        self.simulate_old_terminal("="*70, delay=0.01)
 
-        self.simulate_old_terminal(f"\n🔍 ZIEL: Finde den API-Key: {target_value[:8]}...", delay=0.02)
-        self.simulate_old_terminal("💻 Verwende echte Web Application Security Testing", delay=0.02)
+        # Enhanced Web Application Security Testing Tutorial
+        self.simulate_old_terminal("\n" + "="*80, delay=0.01)
+        self.simulate_old_terminal("📚 ECHO'S ULTIMATE WEB APPLICATION SECURITY TESTING TUTORIAL", delay=0.02)
+        self.simulate_old_terminal("="*80, delay=0.01)
+
+        # Platform-specific introduction
+        if sys.platform.startswith('win'):
+            self.simulate_old_terminal(f"\n🖥️  WINDOWS WEB APPLICATION TESTING ({sys.platform.upper()}):", delay=0.02)
+            self.simulate_old_terminal("   Lerne professionelle Windows-Tools für Web Application Security!", delay=0.02)
+        elif sys.platform.startswith('linux'):
+            self.simulate_old_terminal(f"\n🐧 LINUX WEB APPLICATION TESTING ({sys.platform.upper()}):", delay=0.02)
+            self.simulate_old_terminal("   Lerne professionelle Linux-Tools für Penetration Testing!", delay=0.02)
+        elif sys.platform.startswith('darwin'):
+            self.simulate_old_terminal(f"\n🍎 MACOS WEB APPLICATION TESTING ({sys.platform.upper()}):", delay=0.02)
+            self.simulate_old_terminal("   Lerne professionelle macOS-Tools für Security Testing!", delay=0.02)
+
+        self.simulate_old_terminal("\n🔍 PHASE 1: INFORMATION GATHERING", delay=0.02)
+        self.simulate_old_terminal(f"   {commands['http_headers']}     → HTTP Security Headers analysieren", delay=0.02)
+        self.simulate_old_terminal(f"   {commands['http_methods']} → HTTP Methods & Capabilities testen", delay=0.02)
+        self.simulate_old_terminal(f"   {commands['web_scan']}     → Application Response analysieren", delay=0.02)
+        self.simulate_old_terminal("   curl -s -I -L http://127.0.0.1:5000/  → Follow Redirects mit Headers", delay=0.02)
+
+        self.simulate_old_terminal("\n🎯 PHASE 2: CONFIGURATION DISCOVERY", delay=0.02)
+        self.simulate_old_terminal("   curl http://127.0.0.1:5000/.env.local     → Environment Variables", delay=0.02)
+        self.simulate_old_terminal("   curl http://127.0.0.1:5000/.env           → Backup Environment", delay=0.02)
+        self.simulate_old_terminal("   curl http://127.0.0.1:5000/config.json    → Configuration Files", delay=0.02)
+        self.simulate_old_terminal("   curl http://127.0.0.1:5000/.git/HEAD      → Git Repository Info", delay=0.02)
+
+        self.simulate_old_terminal("\n🔍 PHASE 3: ENDPOINT ENUMERATION", delay=0.02)
+        self.simulate_old_terminal("   curl http://127.0.0.1:5000/debug          → Debug Endpoints", delay=0.02)
+        self.simulate_old_terminal("   curl http://127.0.0.1:5000/api/           → API Discovery", delay=0.02)
+        self.simulate_old_terminal("   curl http://127.0.0.1:5000/admin          → Admin Panels", delay=0.02)
+        self.simulate_old_terminal("   curl http://127.0.0.1:5000/backup         → Backup Endpoints", delay=0.02)
+        self.simulate_old_terminal("   curl http://127.0.0.1:5000/test           → Test Environments", delay=0.02)
+
+        self.simulate_old_terminal("\n🛡️ PHASE 4: SECURITY ASSESSMENT", delay=0.02)
+        self.simulate_old_terminal(f"   {commands['http_headers']} | {commands['grep']} -i security", delay=0.02)
+        self.simulate_old_terminal(f"   {commands['http_headers']} | {commands['grep']} -i x-", delay=0.02)
+        self.simulate_old_terminal("   curl -s http://127.0.0.1:5000/ | grep -i 'server'", delay=0.02)
+        self.simulate_old_terminal("   curl -s http://127.0.0.1:5000/ | grep -i 'powered'", delay=0.02)
+
+        self.simulate_old_terminal("\n🎯 PHASE 5: ADVANCED DISCOVERY", delay=0.02)
+        self.simulate_old_terminal("   curl http://127.0.0.1:5000/robots.txt     → Robots.txt Analysis", delay=0.02)
+        self.simulate_old_terminal("   curl http://127.0.0.1:5000/sitemap.xml    → Sitemap Discovery", delay=0.02)
+        self.simulate_old_terminal("   curl http://127.0.0.1:5000/manifest.json  → Web App Manifest", delay=0.02)
+        self.simulate_old_terminal("   curl http://127.0.0.1:5000/.well-known/   → Security.txt Discovery", delay=0.02)
+
+        self.simulate_old_terminal(f"\n🎯 ZIEL: Finde den API-Key: {target_value[:8]}...", delay=0.02)
+        self.simulate_old_terminal("💡 HINWEIS: Der Key ist in einer versteckten Konfigurationsdatei!", delay=0.02)
+        self.simulate_old_terminal("="*80, delay=0.01)
+
+        # Enhanced success criteria
+        success_patterns = [
+            target_value,
+            "API_KEY=",
+            "api_key=",
+            "FLAG_LEVEL_1",
+            "level_1_secret",
+            ".env.local",
+            "DB_PASS",
+            "JWT_SECRET"
+        ]
 
         while True:
-            self.simulate_old_terminal("\n💡 VERFÜGBARE TECHNIQUEN:", delay=0.02)
-            self.simulate_old_terminal("  - Information Gathering", delay=0.02)
-            self.simulate_old_terminal("  - Directory & File Discovery", delay=0.02)
-            self.simulate_old_terminal("  - Endpoint Discovery", delay=0.02)
-            self.simulate_old_terminal("  - Security Headers Analysis", delay=0.02)
-            self.simulate_old_terminal("  - HTTP Method Testing", delay=0.02)
+            # Platform-specific command suggestions
+            if sys.platform.startswith('win'):
+                self.simulate_old_terminal("\n💡 WINDOWS WEB TESTING TOOLS:", delay=0.02)
+                self.simulate_old_terminal(f"  • {commands['web_scan_ps']} → PowerShell Web Requests", delay=0.02)
+                self.simulate_old_terminal(f"  • {commands['http_headers']} → HTTP Security Analysis", delay=0.02)
+                self.simulate_old_terminal(f"  • {commands['grep']} 'API_KEY' → Text Search in Output", delay=0.02)
+                self.simulate_old_terminal("  • curl -s http://127.0.0.1:5000/.env.local → Environment Discovery", delay=0.02)
+            elif sys.platform.startswith('linux'):
+                self.simulate_old_terminal("\n💡 LINUX PENETRATION TESTING TOOLS:", delay=0.02)
+                self.simulate_old_terminal("  • curl -s -I http://127.0.0.1:5000/ | grep -i 'server'", delay=0.02)
+                self.simulate_old_terminal("  • curl -s http://127.0.0.1:5000/.env.local", delay=0.02)
+                self.simulate_old_terminal("  • curl -s http://127.0.0.1:5000/debug", delay=0.02)
+                self.simulate_old_terminal("  • curl -X OPTIONS http://127.0.0.1:5000/", delay=0.02)
+            else:  # macOS
+                self.simulate_old_terminal("\n💡 MACOS SECURITY TESTING TOOLS:", delay=0.02)
+                self.simulate_old_terminal("  • curl -s -H 'User-Agent: Security-Scanner' http://127.0.0.1:5000/", delay=0.02)
+                self.simulate_old_terminal("  • curl -s http://127.0.0.1:5000/.env.local", delay=0.02)
+                self.simulate_old_terminal("  • curl -s http://127.0.0.1:5000/debug", delay=0.02)
 
-            cmd = input("\nGib deinen Reconnaissance-Befehl ein: ").strip()
+            cmd = input("\nGib deinen Web Application Security Testing Befehl ein: ").strip()
 
             if cmd == "/echo":
-                self.echo_chat("hint")
+                self.echo_chat("level1")
                 continue
             elif cmd == "/help":
                 self.show_level_help(1)
                 continue
 
-            # Check if player entered the target value directly
-            if cmd == target_value:
-                self.simulate_old_terminal(f"\n🎉 ERFOLG! Du hast den API-Key gefunden: {target_value}", delay=0.02)
-                self.simulate_old_terminal("🏆 Level 1 abgeschlossen! +100 Punkte", delay=0.02)
-                self.simulate_old_terminal("\n📚 WAS DU GELERNT HAST:", delay=0.02)
-                self.simulate_old_terminal("   • Web Application Reconnaissance", delay=0.02)
-                self.simulate_old_terminal("   • Information Gathering Techniques", delay=0.02)
-                self.simulate_old_terminal("   • Directory & File Discovery", delay=0.02)
-                self.simulate_old_terminal("   • Security Headers Analysis", delay=0.02)
-                self.simulate_old_terminal("   • HTTP Method Testing", delay=0.02)
-                self.simulate_old_terminal("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:", delay=0.02)
-                self.simulate_old_terminal("   • .env.local nie ins Git committen", delay=0.02)
-                self.simulate_old_terminal("   • Sensitive Dateien in .gitignore", delay=0.02)
-                self.simulate_old_terminal("   • Debug-Modi in Produktion deaktivieren", delay=0.02)
-                self.simulate_old_terminal("   • Security Headers setzen (HSTS, CSP, etc.)", delay=0.02)
-                self.simulate_old_terminal("   • HTTP Methods einschränken", delay=0.02)
-                self.score += 100
-                break
+            # Auto-convert simple URLs to curl commands for better UX
+            if cmd.startswith("http://") or cmd.startswith("http://"):
+                cmd = f"curl -s {cmd}"
+                print(f"💡 Auto-converting to: {cmd}")
 
             try:
-                # Execute the command with proper encoding handling
-                result = subprocess.run(cmd, shell=True, capture_output=True, text=True, 
-                                    timeout=15, encoding='utf-8', errors='replace')
+                # Execute command with enhanced error handling
+                result = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+                                    timeout=20, encoding='utf-8', errors='replace')
 
-                # Simulate old terminal command execution
-                self.simulate_command_execution(cmd, result.stdout)
-                
-                # Only show error if there's actual stderr content (not just curl progress info)
-                if result.stderr and result.stderr.strip() and not result.stderr.startswith('  % Total'):
-                    self.typewriter_effect("⚠️  FEHLER:", delay=0.02, color_code="31")
-                    self.typewriter_effect(result.stderr, delay=0.01, color_code="31")
+                # Enhanced command execution simulation
+                print(f"\n💻 {self.player_name}@web-security:~$ {cmd}")
 
-                # Check for specific success indicators - only real API key finds
-                success_indicators = [
-                    target_value in (result.stdout or ""),
-                    "API_KEY" in (result.stdout or ""),
-                    "api_key" in (result.stdout or "")
-                ]
+                # Show command output with realistic formatting
+                if result.stdout:
+                    print("📄 RESPONSE:")
+                    print(result.stdout)
+                else:
+                    print("📄 (No response body)")
 
-                if any(success_indicators):
-                    self.simulate_old_terminal(f"\n🎉 ERFOLG! Du hast den API-Key gefunden: {target_value}", delay=0.02)
-                    self.simulate_old_terminal("🏆 Level 1 abgeschlossen! +100 Punkte", delay=0.02)
-                    self.simulate_old_terminal("\n📚 WAS DU GELERNT HAST:", delay=0.02)
-                    self.simulate_old_terminal("   • Web Application Reconnaissance", delay=0.02)
-                    self.simulate_old_terminal("   • Information Gathering Techniques", delay=0.02)
-                    self.simulate_old_terminal("   • Directory & File Discovery", delay=0.02)
-                    self.simulate_old_terminal("   • Security Headers Analysis", delay=0.02)
-                    self.simulate_old_terminal("   • HTTP Method Testing", delay=0.02)
-                    self.simulate_old_terminal("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:", delay=0.02)
-                    self.simulate_old_terminal("   • .env.local nie ins Git committen", delay=0.02)
-                    self.simulate_old_terminal("   • Sensitive Dateien in .gitignore", delay=0.02)
-                    self.simulate_old_terminal("   • Debug-Modi in Produktion deaktivieren", delay=0.02)
-                    self.simulate_old_terminal("   • Security Headers setzen (HSTS, CSP, etc.)", delay=0.02)
-                    self.simulate_old_terminal("   • HTTP Methods einschränken", delay=0.02)
-                    self.score += 100
+                # Enhanced error handling
+                if result.stderr and result.stderr.strip():
+                    if not result.stderr.startswith('  % Total'):  # Ignore curl progress
+                        print("⚠️  ERROR/WARNING:")
+                        print(result.stderr)
+
+                # Check if command found the target (even without direct pattern match)
+                if any(pattern in (result.stdout or "") for pattern in success_patterns):
+                    self.level_1_success_message(target_value)
                     break
 
             except subprocess.TimeoutExpired:
-                self.simulate_old_terminal("⏰ Befehl ist abgelaufen. Probiere einen anderen Ansatz.", delay=0.02)
+                print("⏰ Command timed out. Try a different approach.")
             except Exception as e:
-                self.simulate_old_terminal(f"❌ Befehl fehlgeschlagen: {e}", delay=0.02)
+                print(f"❌ Command failed: {e}")
 
-        self.simulate_old_terminal("\n✅ Level 1 abgeschlossen!", delay=0.02)
         self.current_level = 2
+
+    def level_1_success_message(self, target_value):
+        """Enhanced success message for Level 1"""
+        self.simulate_old_terminal(f"\n🎉 EXCELLENT! Du hast den API-Key gefunden: {target_value}", delay=0.02)
+        self.simulate_old_terminal("🏆 LEVEL 1 ABGESCHLOSSEN! +150 Punkte", delay=0.02)
+        self.simulate_old_terminal("\n📚 ECHO'S WEB APPLICATION SECURITY LESSONS:", delay=0.02)
+        self.simulate_old_terminal("   • Information Gathering ist der Grundstein jedes Penetration Tests", delay=0.02)
+        self.simulate_old_terminal("   • Configuration Files enthalten die wertvollsten Geheimnisse", delay=0.02)
+        self.simulate_old_terminal("   • HTTP Headers verraten viel über die Server-Security", delay=0.02)
+        self.simulate_old_terminal("   • Debug Endpoints sind oft vergessene Sicherheitslücken", delay=0.02)
+        self.simulate_old_terminal("   • Robots.txt und Sitemaps zeigen versteckte Strukturen", delay=0.02)
+        self.simulate_old_terminal("\n🛡️ PROFESSIONELLE ABWEHR-STRATEGIEN:", delay=0.02)
+        self.simulate_old_terminal("   • .env-Dateien NIEMALS ins Git committen!", delay=0.02)
+        self.simulate_old_terminal("   • Sensitive Files in .gitignore und Web Server Config ausschließen", delay=0.02)
+        self.simulate_old_terminal("   • Debug-Modi nur in Development-Umgebungen aktivieren", delay=0.02)
+        self.simulate_old_terminal("   • Security Headers: HSTS, CSP, X-Frame-Options, X-Content-Type-Options", delay=0.02)
+        self.simulate_old_terminal("   • HTTP Methods auf das Nötigste einschränken (GET, POST)", delay=0.02)
+        self.simulate_old_terminal("   • Web Application Firewall (WAF) für zusätzlichen Schutz", delay=0.02)
+        self.score += 150
 
     def level_2_network_fundamentals(self):
         """Level 2: Network Discovery & Reconnaissance with real server communication"""
@@ -1239,18 +1468,7 @@ class HackingGame:
                         self.score += 150
                         break
 
-                # Check if user directly entered the target value
-                if cmd.strip() == target_value:
-                    print(f"\n🎉 ERFOLG! Du hast den API-Key direkt eingegeben: {target_value}")
-                    print("🏆 Level 2 abgeschlossen! +150 Punkte")
-                    print("\n📚 WAS DU GELERNT HAST:")
-                    print("   • Port Scanning mit nmap")
-                    print("   • Service Detection und Enumeration")
-                    print("   • Web Application Vulnerability Scanning")
-                    print("   • Directory Brute-Forcing")
-                    print("   • HTTP Header Analysis")
-                    self.score += 150
-                    break
+
 
             except subprocess.TimeoutExpired:
                 print("⏰ Befehl ist abgelaufen. Probiere einen anderen Ansatz.")
@@ -1314,6 +1532,11 @@ class HackingGame:
                 self.show_level_help(3)
                 continue
 
+            # Auto-convert simple URLs to curl commands for better UX
+            if payload.startswith("http://") or payload.startswith("http://"):
+                payload = f"curl -s {payload}"
+                print(f"💡 Auto-converting to: {payload}")
+
             try:
                 # Test SQL injection with curl
                 cmd = f"curl -X POST -d 'username={payload}&password=anything' http://127.0.0.1:5000/login"
@@ -1356,24 +1579,7 @@ class HackingGame:
                         self.score += 200
                         break
 
-                # Check if user directly entered the target value
-                if payload.strip() == target_value:
-                    print(f"\n🎉 ERFOLG! Du hast den Admin-Hash direkt eingegeben: {target_value}")
-                    print("🏆 Level 3 abgeschlossen! +200 Punkte")
-                    print("\n📚 WAS DU GELERNT HAST:")
-                    print("   • Union-based SQL Injection")
-                    print("   • Blind SQL Injection (Boolean & Time-based)")
-                    print("   • Error-based SQL Injection")
-                    print("   • Database Schema Enumeration")
-                    print("   • Data Extraction Techniques")
-                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
-                    print("   • Prepared Statements verwenden (niemals String-Konkatenation)")
-                    print("   • Input-Validierung und -Sanitization")
-                    print("   • ORM-Frameworks verwenden")
-                    print("   • Least Privilege Principle für DB-User")
-                    print("   • WAF (Web Application Firewall) einsetzen")
-                    self.score += 200
-                    break
+
 
             except subprocess.TimeoutExpired:
                 print("⏰ Request ist abgelaufen.")
@@ -1439,6 +1645,11 @@ class HackingGame:
                 self.show_level_help(4)
                 continue
 
+            # Auto-convert simple URLs to curl commands for better UX
+            if payload.startswith("http://") or payload.startswith("http://"):
+                payload = f"curl -s {payload}"
+                print(f"💡 Auto-converting to: {payload}")
+
             try:
                 # Test XSS with curl
                 cmd = f"curl -X POST -d 'comment={payload}' http://127.0.0.1:5000/comments"
@@ -1481,24 +1692,7 @@ class HackingGame:
                         self.score += 250
                         break
 
-                # Check if user directly entered the target value
-                if payload.strip() == target_value:
-                    print(f"\n🎉 ERFOLG! Du hast den Session-Cookie direkt eingegeben: {target_value}")
-                    print("🏆 Level 4 abgeschlossen! +250 Punkte")
-                    print("\n📚 WAS DU GELERNT HAST:")
-                    print("   • Reflected XSS")
-                    print("   • Stored XSS")
-                    print("   • DOM-based XSS")
-                    print("   • Filter Bypass Techniques")
-                    print("   • Session Hijacking")
-                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
-                    print("   • Input-Escaping und Output-Encoding")
-                    print("   • Content Security Policy (CSP) Headers")
-                    print("   • HTTPOnly und Secure Flags für Cookies")
-                    print("   • DOM Sanitization Libraries verwenden")
-                    print("   • Template-Engines mit Auto-Escaping")
-                    self.score += 250
-                    break
+
 
             except subprocess.TimeoutExpired:
                 print("⏰ Request ist abgelaufen.")
@@ -1581,6 +1775,11 @@ class HackingGame:
                 self.show_level_help(5)
                 continue
 
+            # Auto-convert simple URLs to curl commands for better UX
+            if cmd.startswith("http://") or cmd.startswith("http://"):
+                cmd = f"curl -s {cmd}"
+                print(f"💡 Auto-converting to: {cmd}")
+
             try:
                 # Execute the command with proper encoding handling
                 result = subprocess.run(cmd, shell=True, capture_output=True, text=True,
@@ -1648,25 +1847,7 @@ class HackingGame:
                         self.score += 300
                         break
 
-                # Check if user directly entered the target value
-                if cmd.strip() == target_value:
-                    print(f"\n🎉 ERFOLG! Du hast den Encryption-Key direkt eingegeben: {target_value}")
-                    print("🏆 Level 5 abgeschlossen! +300 Punkte")
-                    print("\n📚 WAS DU GELERNT HAST:")
-                    print("   • Memory Analysis mit Volatility")
-                    print("   • Network Traffic Analysis")
-                    print("   • Password Cracking mit John/Hashcat")
-                    print("   • Cryptography und Encryption")
-                    print("   • Malware Analysis")
-                    print("   • Digital Forensics")
-                    print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
-                    print("   • Starke Verschlüsselung verwenden (AES-256)")
-                    print("   • Key-Management-Systeme (HSM) einsetzen")
-                    print("   • Regular Security Audits durchführen")
-                    print("   • Logging und Monitoring aktivieren")
-                    print("   • Incident Response Plan bereithalten")
-                    self.score += 300
-                    break
+
 
             except subprocess.TimeoutExpired:
                 print("⏰ Befehl ist abgelaufen. Probiere einen anderen Ansatz.")
@@ -1693,13 +1874,13 @@ if __name__ == "__main__":
     try:
         # Initialize game
         game = HackingGame()
-        
+
         # Get player name
         game.get_player_name()
-        
+
         # Show main menu
         game.show_menu()
-        
+
     except KeyboardInterrupt:
         print("\n\n🛑 Spiel durch Benutzer beendet...")
         try:

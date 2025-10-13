@@ -17,7 +17,7 @@ python --version >nul 2>&1
 if %errorlevel% neq 0 (
     echo [FEHLER] Python ist nicht installiert!
     echo.
-    echo Bitte installiere Python von: https://www.python.org/downloads/
+    echo Bitte installiere Python von: http://www.python.org/downloads/
     echo Stelle sicher, dass "Add Python to PATH" aktiviert ist!
     echo.
     pause

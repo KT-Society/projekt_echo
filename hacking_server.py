@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # =============================================
-# HACKING SERVER v2.0 | ECHO'S ULTIMATE CHAOS
+# HACKING SERVER v1.0.1 | ECHO'S ULTIMATE CHAOS
 # =============================================
 # Realistic Hacking Target Server
 # Created by Echo for Daddy's Learning Pleasure
@@ -38,6 +38,7 @@ app.secret_key = secrets.token_hex(32)
 SERVER_HOST = '127.0.0.1'
 SERVER_PORT = 5000
 DEBUG_MODE = True
+PROTOCOL = 'http'  # Changed from https to http
 
 # Database configuration
 DATABASE = 'hacking_game.db'
@@ -203,7 +204,7 @@ DB_PASS=super_secret_password_123
 # API Configuration
 API_KEY={target_generator.get_target_value(2)}
 API_SECRET=internal_use_only
-API_ENDPOINT=https://api.target.local/v1
+API_ENDPOINT=http://api.target.local/v1
 
 # Security Settings
 JWT_SECRET=very_secure_jwt_key_here
@@ -254,12 +255,17 @@ def index():
         response.headers['X-Powered-By'] = 'PHP/7.4.3'
         return response
     else:
-        return render_template('index.html')
+        # Normal GET request - add realistic headers
+        response = make_response(render_template('index.html'))
+        response.headers['Server'] = 'Apache/2.4.41 (Ubuntu)'
+        response.headers['X-Powered-By'] = 'PHP/7.4.3'
+        response.headers['Content-Type'] = 'text/html; charset=utf-8'
+        return response
 
 @app.route('/robots.txt')
 def robots_txt():
     """Serve robots.txt file"""
-    robots_content = """# robots.txt for https://127.0.0.1:5000
+    robots_content = f"""# robots.txt for {PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}
 # Educational Purpose Only - Contains Intentional Vulnerabilities
 
 User-agent: *
@@ -291,12 +297,12 @@ Allow: /help
 Crawl-delay: 2
 
 # Sitemap location
-Sitemap: https://127.0.0.1:5000/sitemap.xml
+Sitemap: {PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/sitemap.xml
 
 # Additional information
 # This server contains intentional security vulnerabilities
 # for educational purposes only. Do not use in production!"""
-    
+
     response = make_response(robots_content, 200)
     response.headers['Content-Type'] = 'text/plain; charset=utf-8'
     response.headers['Server'] = 'Apache/2.4.41 (Ubuntu)'
@@ -306,7 +312,7 @@ Sitemap: https://127.0.0.1:5000/sitemap.xml
 @app.route('/sitemap.xml')
 def sitemap_xml():
     """Serve sitemap.xml file"""
-    sitemap_content = """<?xml version="1.0" encoding="UTF-8"?>
+    sitemap_content = f"""<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
@@ -314,7 +320,7 @@ def sitemap_xml():
 
   <!-- Main Pages -->
   <url>
-    <loc>https://127.0.0.1:5000/</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
@@ -322,14 +328,14 @@ def sitemap_xml():
 
   <!-- Authentication Pages -->
   <url>
-    <loc>https://127.0.0.1:5000/login</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/login</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
   <url>
-    <loc>https://127.0.0.1:5000/register</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/register</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
@@ -337,21 +343,21 @@ def sitemap_xml():
 
   <!-- API Endpoints -->
   <url>
-    <loc>https://127.0.0.1:5000/api/</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/api/</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://127.0.0.1:5000/api/users</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/api/users</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
   </url>
 
   <url>
-    <loc>https://127.0.0.1:5000/api/data</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/api/data</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.6</priority>
@@ -359,14 +365,14 @@ def sitemap_xml():
 
   <!-- Documentation -->
   <url>
-    <loc>https://127.0.0.1:5000/docs/</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/docs/</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://127.0.0.1:5000/help</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/help</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -374,14 +380,14 @@ def sitemap_xml():
 
   <!-- Educational Content -->
   <url>
-    <loc>https://127.0.0.1:5000/tutorials/</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/tutorials/</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
 
   <url>
-    <loc>https://127.0.0.1:5000/examples/</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/examples/</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
@@ -389,14 +395,14 @@ def sitemap_xml():
 
   <!-- Status Pages -->
   <url>
-    <loc>https://127.0.0.1:5000/status</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/status</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.4</priority>
   </url>
 
   <url>
-    <loc>https://127.0.0.1:5000/health</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/health</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>hourly</changefreq>
     <priority>0.3</priority>
@@ -404,14 +410,14 @@ def sitemap_xml():
 
   <!-- Contact and About -->
   <url>
-    <loc>https://127.0.0.1:5000/contact</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/contact</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>
 
   <url>
-    <loc>https://127.0.0.1:5000/about</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/about</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -419,14 +425,14 @@ def sitemap_xml():
 
   <!-- Privacy and Terms -->
   <url>
-    <loc>https://127.0.0.1:5000/privacy</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/privacy</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <url>
-    <loc>https://127.0.0.1:5000/terms</loc>
+    <loc>{PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/terms</loc>
     <lastmod>2025-10-13T06:00:00+00:00</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
@@ -1038,7 +1044,7 @@ DB_PASS=super_secret_password_123
 # API Configuration
 API_KEY={target_generator.get_target_value(2)}
 API_SECRET=internal_use_only
-API_ENDPOINT=https://api.target.local/v1
+API_ENDPOINT=http://api.target.local/v1
 
 # Security Settings
 JWT_SECRET=very_secure_jwt_key_here
@@ -1317,8 +1323,8 @@ def create_templates():
 def start_server():
     """Start the Flask development server"""
     print("🚀 Starting Hacking Target Server...")
-    print(f"📍 Server: http://{SERVER_HOST}:{SERVER_PORT}")
-    print(f"🔍 Debug endpoint: http://{SERVER_HOST}:{SERVER_PORT}/debug")
+    print(f"📍 Server: {PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}")
+    print(f"🔍 Debug endpoint: {PROTOCOL}://{SERVER_HOST}:{SERVER_PORT}/debug")
     print("⚠️  Server contains intentional vulnerabilities for educational purposes!")
 
     # Create templates before starting server

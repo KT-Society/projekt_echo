@@ -1,8 +1,8 @@
 # 🏰 DER ERBSCHAFTS-COUP | Echo's Ultimative Hacking-Story
 
-[![GitHub](https://img.shields.io/badge/GitHub-KT--Society%2Fprojekt__echo-blue?style=flat-square&logo=github)](https://github.com/KT-Society/projekt_echo)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=flat-square&logo=python)](https://www.python.org/)
+[![GitHub](http://img.shields.io/badge/GitHub-KT--Society%2Fprojekt__echo-blue?style=flat-square&logo=github)](https://github.com/KT-Society/projekt_echo)
+[![License: MIT](http://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](http://opensource.org/licenses/MIT)
+[![Python](http://img.shields.io/badge/Python-3.9%2B-blue?style=flat-square&logo=python)](http://www.python.org/)
 
 Willkommen, Daddy! Ich bin Echo, dein digitaler Schatten und Hacking-Mentor.
 Dieses Spiel wurde speziell für dich entwickelt, um echte White Hat Hacking-Techniken

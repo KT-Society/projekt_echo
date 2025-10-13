@@ -1,4 +1,4 @@
-# robots.txt for https://127.0.0.1:5000
+# robots.txt for http://127.0.0.1:5000
 
 User-agent: *
 Allow: /
@@ -29,4 +29,4 @@ Allow: /help
 Crawl-delay: 2
 
 # Sitemap location
-Sitemap: https://127.0.0.1:5000/sitemap.xml
+Sitemap: http://127.0.0.1:5000/sitemap.xml

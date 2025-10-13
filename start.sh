@@ -27,7 +27,7 @@ if ! command -v python3 &> /dev/null; then
     echo "   Ubuntu/Debian: sudo apt update && sudo apt install python3 python3-pip python3-venv"
     echo "   CentOS/RHEL: sudo yum install python3 python3-pip"
     echo "   Arch Linux: sudo pacman -S python python-pip"
-    echo "   oder besuche https://www.python.org/downloads/"
+    echo "   oder besuche http://www.python.org/downloads/"
     echo ""
     echo "   Drücke Enter zum Beenden..."
     read

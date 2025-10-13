@@ -25,7 +25,7 @@ if ! command -v python3 &> /dev/null; then
     echo -e "${RED}❌ Python3 wurde nicht gefunden!${NC}"
     echo "   Bitte installiere Python 3.9+ mit:"
     echo "   Homebrew: brew install python3"
-    echo "   oder besuche https://www.python.org/downloads/"
+    echo "   oder besuche http://www.python.org/downloads/"
     echo "   oder verwende pyenv: brew install pyenv && pyenv install 3.9.0"
     echo ""
     echo "   Drücke Enter zum Beenden..."
@@ -41,7 +41,7 @@ if command -v brew &> /dev/null; then
     echo "   Tipp: Du kannst auch 'brew install python3' verwenden"
 else
     echo -e "${YELLOW}⚠️  Homebrew nicht gefunden (optional)${NC}"
-    echo "   Du kannst es installieren mit: /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
+    echo "   Du kannst es installieren mit: /bin/bash -c \"\$(curl -fsSL http://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
 fi
 
 # --- 3. Check/create Virtual Environment (venv) ---

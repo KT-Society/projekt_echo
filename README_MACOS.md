@@ -39,7 +39,7 @@ Das Skript wird automatisch:
     **Mit Homebrew (empfohlen):**
     ```bash
     # Homebrew installieren (falls noch nicht vorhanden)
-    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    /bin/bash -c "$(curl -fsSL http://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     
     # Python3 installieren
     brew install python3
@@ -56,7 +56,7 @@ Das Skript wird automatisch:
     ```
     
     **Direkt von python.org:**
-    Besuche https://www.python.org/downloads/ und lade die macOS-Version herunter.
+    Besuche http://www.python.org/downloads/ und lade die macOS-Version herunter.
 
 *   **Berechtigungsfehler:**
     Falls du Berechtigungsfehler bekommst, stelle sicher, dass das Skript ausführbar ist:
