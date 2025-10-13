@@ -204,7 +204,7 @@ DB_PASS=super_secret_password_123
 # API Configuration
 API_KEY={target_generator.get_target_value(2)}
 API_SECRET=internal_use_only
-API_ENDPOINT=http://api.target.local/v1
+API_ENDPOINT=http://127.0.0.1:5000/api/secret
 
 # Security Settings
 JWT_SECRET=very_secure_jwt_key_here
@@ -1044,7 +1044,7 @@ DB_PASS=super_secret_password_123
 # API Configuration
 API_KEY={target_generator.get_target_value(2)}
 API_SECRET=internal_use_only
-API_ENDPOINT=http://api.target.local/v1
+API_ENDPOINT=http://127.0.0.1:5000/api/secret
 
 # Security Settings
 JWT_SECRET=very_secure_jwt_key_here

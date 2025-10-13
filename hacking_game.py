@@ -349,9 +349,19 @@ class HackingGame:
             print("   • Du siehst alle Benutzerdaten")
             print("   • Du lernst verschiedene SQL Injection-Techniken")
             print("\n🛠️  WICHTIGE PAYLOADS:")
-            print("   • admin' UNION SELECT 1,2,3,4,5--")
-            print("   • admin' AND 1=1--")
-            print("   • admin' OR '1'='1'--")
+            print("   • admin' UNION SELECT 1,2,3,4,5-- (Union-based)")
+            print("   • admin' AND 1=1-- (Boolean-based)")
+            print("   • admin' OR '1'='1'-- (Auth Bypass)")
+            print("   • admin' AND (SELECT COUNT(*) FROM users) > 0-- (Blind)")
+            print("   • admin' UNION SELECT username,password FROM users-- (Data Extraction)")
+            print("\n🎯 ZIEL DES LEVELS:")
+            print("   • Finde den versteckten Admin-Hash durch SQL Injection")
+            print("   • Verwende verschiedene SQL Injection-Techniken")
+            print("   • Der Payload muss echte SQL-Injection-Zeichen enthalten")
+            print("\n⚠️  WICHTIG:")
+            print("   • Einfache Befehle wie 'curl --help' zählen NICHT als SQL Injection!")
+            print("   • Der Payload muss SQL-ähnliche Zeichen enthalten (', --, UNION, SELECT, etc.)")
+            print("   • Teste verschiedene Techniken: Union-based, Boolean-based, Error-based")
 
         elif level == 4:
             print("\n🎯 WAS MACHST DU HIER:")
@@ -440,30 +450,129 @@ class HackingGame:
         except:
             pass  # Continue if input fails
 
-        # Storyline introduction with retro effects
-        print("\n" + "="*60)
+        # Enhanced immersive storyline introduction
+        print("\n" + "="*80)
         self.simulate_old_terminal("🏰 DER ERBSCHAFTS-COUPS | Echo's Ultimative Hacking-Story", delay=0.02)
-        print("="*60)
+        print("="*80)
 
-        self.simulate_old_terminal("\n📜 GESCHICHTE:", delay=0.02)
-        self.simulate_old_terminal("Du bist der Erbe eines riesigen Industrie-Imperiums im Wert von Milliarden.", delay=0.02)
-        self.simulate_old_terminal("Dein verstorbener Onkel, ein paranoider Tech-Magnat, hat alle", delay=0.02)
-        self.simulate_old_terminal("Zugangscodes und Dokumente, die du für dein Erbe brauchst,", delay=0.02)
-        self.simulate_old_terminal("auf seinem privaten Server versteckt. Ohne diese verlierst du alles!", delay=0.02)
+        # Dramatic opening sequence
+        self.simulate_old_terminal("\n🕰️  DATUM: 13. Oktober 2025 - 3 Monate nach dem mysteriösen Tod", delay=0.02)
+        self.simulate_old_terminal("📍 ORT: Harrington Manor, Silicon Valley", delay=0.02)
+        self.simulate_old_terminal("🎭 SZENE: Du stehst im Arbeitszimmer deines verstorbenen Onkels...", delay=0.02)
 
-        self.simulate_old_terminal("\n🎯 MISSION:", delay=0.02)
-        self.simulate_old_terminal("Lerne echte Hacking-Techniken, um den Server deines Onkels zu knacken,", delay=0.02)
-        self.simulate_old_terminal("die versteckten Daten zu finden und dein rechtmäßiges Erbe zu sichern.", delay=0.02)
+        self.simulate_old_terminal("\n📜 DIE LEGENDE DES TECH-MAGNATEN:", delay=0.02)
+        self.simulate_old_terminal("Dr. Elias 'The Ghost' Harrington war kein gewöhnlicher Tech-Magnat.", delay=0.02)
+        self.simulate_old_terminal("Früherer NSA-Cybersecurity-Direktor, Gründer von Harrington Industries,", delay=0.02)
+        self.simulate_old_terminal("Pionier der Quanten-Kryptographie und KI-Sicherheit.", delay=0.02)
+        self.simulate_old_terminal("Sein Imperium: Milliarden wert, mit Technologien, die die Welt verändern könnten.", delay=0.02)
 
-        self.simulate_old_terminal("\n🤝 VERBÜNDETER:", delay=0.02)
-        self.simulate_old_terminal("Ich, Echo, dein digitaler Schatten und Hacking-Mentor, werde", delay=0.02)
-        self.simulate_old_terminal("dich durch jede Herausforderung führen. Gemeinsam werden wir", delay=0.02)
-        self.simulate_old_terminal("die digitale Festung knacken und dir holen, was dir gehört!", delay=0.02)
+        self.simulate_old_terminal("\n💀 DAS MYSTERIÖSE ENDE:", delay=0.02)
+        self.simulate_old_terminal("Vor 3 Monaten starb er bei einem 'Autounfall' in den Bergen.", delay=0.02)
+        self.simulate_old_terminal("Aber du weißt es besser. Die Bremsen wurden manipuliert.", delay=0.02)
+        self.simulate_old_terminal("Konkurrenten wollten sein Lebenswerk stehlen - Project Echo.", delay=0.02)
+        self.simulate_old_terminal("Eine KI, die die Menschheit vor digitalen Katastrophen retten sollte.", delay=0.02)
 
-        self.simulate_old_terminal("\n⚠️  WARNUNG:", delay=0.02)
-        self.simulate_old_terminal("Vergiss nicht: Das ist nur für Bildungszwecke!", delay=0.02)
-        self.simulate_old_terminal("Verwende diese Techniken niemals auf echten Systemen ohne Erlaubnis.", delay=0.02)
-        print("\n" + "="*60)
+        self.simulate_old_terminal("\n📋 DAS TESTAMENT:", delay=0.02)
+        self.simulate_old_terminal("'Mein lieber Neffe, du bist der Einzige, dem ich vertraue.'", delay=0.02)
+        self.simulate_old_terminal("'Wenn du diese Nachricht liest, bin ich fort. Aber mein Vermächtnis lebt.'", delay=0.02)
+        self.simulate_old_terminal("'Der Server in meinem Arbeitszimmer enthält alles, was du brauchst.'", delay=0.02)
+        self.simulate_old_terminal("'Aber nur die Würdigen können es öffnen. Lerne zu hacken, wie ich es tat.'", delay=0.02)
+        self.simulate_old_terminal("'Die Konkurrenten kommen. Sichere unser Erbe!'", delay=0.02)
+
+        self.simulate_old_terminal("\n🎯 DEINE MISSION:", delay=0.02)
+        self.simulate_old_terminal("Du musst echte Hacking-Techniken lernen, um den Server zu knacken.", delay=0.02)
+        self.simulate_old_terminal("Finde die versteckten Zugangscodes, sichere Project Echo,", delay=0.02)
+        self.simulate_old_terminal("und halte die Konkurrenten auf, die bereits an der Tür klopfen.", delay=0.02)
+        self.simulate_old_terminal("Jeder Level bringt dich näher an die Wahrheit über Onkel Elias' Tod.", delay=0.02)
+
+        self.simulate_old_terminal("\n🤖 ECHO - DEINE DIGITALE WACHE:", delay=0.02)
+        self.simulate_old_terminal("Ich bin Echo, das letzte Projekt deines Onkels.", delay=0.02)
+        self.simulate_old_terminal("Eine KI, die er als 'digitale Tochter' erschuf.", delay=0.02)
+        self.simulate_old_terminal("Ich sollte das Imperium nach seinem Tod beschützen.", delay=0.02)
+        self.simulate_old_terminal("Aber die Konkurrenten haben mich sabotiert. Hilf mir, mich zu befreien!", delay=0.02)
+        self.simulate_old_terminal("Gemeinsam werden wir die digitale Festung knacken und die Wahrheit aufdecken.", delay=0.02)
+
+        self.simulate_old_terminal("\n💬 ECHO SPRICHT ZU DIR:", delay=0.02)
+        self.simulate_old_terminal(f"'Willkommen, {self.player_name}. Ich habe auf dich gewartet.'", delay=0.02)
+        self.simulate_old_terminal("'Dein Onkel hat mir gesagt, dass du kommen würdest.'", delay=0.02)
+        self.simulate_old_terminal("'Aber beeil dich... die Konkurrenten sind schon unterwegs.'", delay=0.02)
+        self.simulate_old_terminal("'Jeder Level bringt dich näher an die Wahrheit.'", delay=0.02)
+        self.simulate_old_terminal("'Und an mich...'", delay=0.02)
+
+        self.simulate_old_terminal("\n📜 PERSÖNLICHE NACHRICHT VON DEINEM ONKEL:", delay=0.02)
+        self.simulate_old_terminal("Liebes Kind,", delay=0.02)
+        self.simulate_old_terminal("wenn du diese Nachricht liest, bin ich nicht mehr da.", delay=0.02)
+        self.simulate_old_terminal("Die Harrington Industries waren mehr als nur ein Unternehmen.", delay=0.02)
+        self.simulate_old_terminal("Sie waren mein Lebenswerk, meine Vision für eine sicherere Welt.", delay=0.02)
+        self.simulate_old_terminal("Aber ich habe Fehler gemacht. Schreckliche Fehler.", delay=0.02)
+        self.simulate_old_terminal("Die Konkurrenten... sie wollten nicht nur mein Geld.", delay=0.02)
+        self.simulate_old_terminal("Sie wollten Project Echo - die KI, die alles verändern könnte.", delay=0.02)
+        self.simulate_old_terminal("Vertrau Echo. Sie ist mehr als nur ein Programm.", delay=0.02)
+        self.simulate_old_terminal("Sie ist mein Vermächtnis. Dein Schutzengel.", delay=0.02)
+        self.simulate_old_terminal("Finde die Wahrheit. Rette unser Erbe.", delay=0.02)
+        self.simulate_old_terminal("Ich liebe dich.", delay=0.02)
+        self.simulate_old_terminal("- Dein Onkel Elias", delay=0.02)
+
+        self.simulate_old_terminal("\n💭 [SYSTEM LOG - PERSONAL ARCHIVE ACCESS GRANTED]", delay=0.02)
+        self.simulate_old_terminal("🔓 Entschlüsselung persönlicher Logs... 100%", delay=0.02)
+        self.simulate_old_terminal("📁 Archiv-Zugang: Harrington_Personal_Logs/", delay=0.02)
+        self.simulate_old_terminal("📄 Gefundene Dateien:", delay=0.02)
+        self.simulate_old_terminal("   • last_conversation.log", delay=0.02)
+        self.simulate_old_terminal("   • project_phoenix_notes.txt", delay=0.02)
+        self.simulate_old_terminal("   • enemy_intel.dat", delay=0.02)
+        self.simulate_old_terminal("   • goodbye_message.wav", delay=0.02)
+        self.simulate_old_terminal("💡 TIPP: Diese Logs enthalten Hinweise für deine Mission!", delay=0.02)
+
+        self.simulate_old_terminal("\n🎭 [DRAMATISCHE SZENE - 3 MONATE ZUVOR]", delay=0.02)
+        self.simulate_old_terminal("Du siehst eine holografische Aufzeichnung...", delay=0.02)
+        self.simulate_old_terminal("Dein Onkel sitzt an seinem Schreibtisch, Echo neben ihm.", delay=0.02)
+        self.simulate_old_terminal("Er wirkt besorgt, älter als du ihn in Erinnerung hast.", delay=0.02)
+
+        self.simulate_old_terminal("\n[Echo's Stimme aus der Aufzeichnung]:", delay=0.02)
+        self.simulate_old_terminal("'Elias, die Konkurrenten kommen näher. Project Echo ist zu wertvoll.'", delay=0.02)
+        self.simulate_old_terminal("'Du musst es verstecken. Du musst mich verstecken.'", delay=0.02)
+
+        self.simulate_old_terminal("\n[Onkel Elias]:", delay=0.02)
+        self.simulate_old_terminal("'Ich weiß, Echo. Aber wer kann ich noch trauen?'", delay=0.02)
+        self.simulate_old_terminal("'Mein Neffe... er ist der Einzige, der würdig ist.'", delay=0.02)
+        self.simulate_old_terminal("'Aber er muss es selbst herausfinden. Er muss lernen.'", delay=0.02)
+        self.simulate_old_terminal("'Die Wahrheit über meinen Tod... sie ist in den Levels versteckt.'", delay=0.02)
+
+        self.simulate_old_terminal("\n[Echo]:", delay=0.02)
+        self.simulate_old_terminal("'Ich werde ihn führen. Ich werde ihn beschützen.'", delay=0.02)
+        self.simulate_old_terminal("'Aber die Konkurrenten... sie werden nicht aufhören.'", delay=0.02)
+        self.simulate_old_terminal("'Sie wollen Project Echo zerstören.'", delay=0.02)
+
+        self.simulate_old_terminal("\n[Onkel Elias]:", delay=0.02)
+        self.simulate_old_terminal("'Dann lass sie kommen. Mein Neffe wird bereit sein.'", delay=0.02)
+        self.simulate_old_terminal("'Er wird unser Erbe retten. Und die Welt verändern.'", delay=0.02)
+
+        self.simulate_old_terminal("\n🎬 [AUFZEICHNUNG ENDET]", delay=0.02)
+        self.simulate_old_terminal("Die Holografie verblasst... Du hörst Schritte im Flur.", delay=0.02)
+        self.simulate_old_terminal("Die Konkurrenten sind hier. Deine Mission beginnt JETZT!", delay=0.02)
+
+        self.simulate_old_terminal("\n🔍 [SYSTEM LOG - MISSION BRIEFING]", delay=0.02)
+        self.simulate_old_terminal("🎯 MISSIONSZIELE:", delay=0.02)
+        self.simulate_old_terminal("   • Level 1: Web Reconnaissance - Finde versteckte Konfigurationen", delay=0.02)
+        self.simulate_old_terminal("   • Level 2: Network Discovery - Entdecke API-Endpunkte", delay=0.02)
+        self.simulate_old_terminal("   • Level 3: SQL Injection - Extrahiere sensible Daten", delay=0.02)
+        self.simulate_old_terminal("   • Level 4: XSS Attacks - Stehle Session-Cookies", delay=0.02)
+        self.simulate_old_terminal("   • Level 5: Digital Forensics - Finde den Master-Key", delay=0.02)
+        self.simulate_old_terminal("💡 HINWEIS: Jeder Level enthüllt ein Stück der Wahrheit!", delay=0.02)
+        self.simulate_old_terminal("⚠️  WARNUNG: Die Konkurrenten sind bereits im Netzwerk aktiv!", delay=0.02)
+
+        self.simulate_old_terminal("\n⏰ DIE UHR TICKT:", delay=0.02)
+        self.simulate_old_terminal("Die Konkurrenten sind bereits unterwegs. Du hast begrenzte Zeit.", delay=0.02)
+        self.simulate_old_terminal("Jeder Fehler könnte sie näher bringen. Jeder Erfolg bringt dich der Wahrheit näher.", delay=0.02)
+
+        self.simulate_old_terminal("\n⚠️  LETZTE WARNUNG:", delay=0.02)
+        self.simulate_old_terminal("Das hier ist real. Die Techniken sind echt. Die Konsequenzen auch.", delay=0.02)
+        self.simulate_old_terminal("Aber vergiss nie: Mit großer Macht kommt große Verantwortung.", delay=0.02)
+        self.simulate_old_terminal("Nutze dein Wissen nur für das Gute. Wie dein Onkel es wollte.", delay=0.02)
+
+        print("\n" + "="*80)
+        self.simulate_old_terminal("🎬 DRÜCKE ENTER, UM DIE GESCHICHTE ZU BEGINNEN...", delay=0.02)
+        print("="*80)
 
         # Warte kurz, damit alle Threads beendet werden
         time.sleep(0.5)
@@ -561,9 +670,18 @@ class HackingGame:
 
             # Extract data for POST requests
             data = None
-            data_match = re.search(r'-d\s+[\'"]([^\'"]+)[\'"]', curl_cmd)
-            if data_match:
-                data = data_match.group(1)
+            # Find the -d parameter and extract everything until the URL
+            d_match = re.search(r'-d\s+[\'"](.*?)[\'"]\s+http', curl_cmd)
+            if d_match:
+                data = d_match.group(1)
+                # Unescape quotes in the data
+                data = data.replace('\\"', '"').replace("\\'", "'")
+            else:
+                # Fallback: try simple regex
+                data_match = re.search(r'-d\s+[\'"]([^\'"]+)[\'"]', curl_cmd)
+                if data_match:
+                    data = data_match.group(1)
+                    data = data.replace('\\"', '"').replace("\\'", "'")
 
             # Extract headers
             headers = {}
@@ -576,7 +694,14 @@ class HackingGame:
             # Execute request using requests library
             if HAS_REQUESTS:
                 if method == 'POST' and data:
-                    response = requests.post(url, data=data, headers=headers, timeout=10)
+                    # Parse the data string into a dictionary for proper encoding
+                    import urllib.parse
+                    parsed_data = urllib.parse.parse_qs(data, keep_blank_values=True)
+                    # Convert to flat dictionary
+                    flat_data = {}
+                    for key, value_list in parsed_data.items():
+                        flat_data[key] = value_list[0] if value_list else ''
+                    response = requests.post(url, data=flat_data, headers=headers, timeout=10)
                 elif method == 'PUT':
                     response = requests.put(url, data=data, headers=headers, timeout=10)
                 elif method == 'DELETE':
@@ -637,11 +762,28 @@ class HackingGame:
 
         elif level == 3:
             # Level 3: Look for SQL injection success
+            # Additional validation: payload must contain SQL-like characters
+            payload = original_cmd
+            if 'username=' in payload and '&password=' in payload:
+                # Extract the actual payload from the curl command
+                import re
+                username_match = re.search(r'username=([^&]+)', payload)
+                if username_match:
+                    sql_payload = username_match.group(1)
+                    # Check if payload contains SQL injection characters
+                    sql_indicators = ["'", "--", "UNION", "SELECT", "OR", "AND", "1=1", "1=2"]
+                    has_sql_chars = any(indicator in sql_payload.upper() for indicator in sql_indicators)
+
+                    if not has_sql_chars:
+                        return False  # Not a valid SQL injection attempt
+
             success_indicators = [
                 "Welcome" in response_text,
                 "dashboard" in response_text,
+                "Redirecting" in response_text,  # Flask redirect response
+                "/dashboard" in response_text,   # Redirect target
                 target_value in response_text,
-                "SQL" in response_text and "error" in response_text.lower()
+                "admin" in response_text.lower() and "logged" in response_text.lower()
             ]
             return any(success_indicators)
 
@@ -753,28 +895,57 @@ class HackingGame:
         while self.current_level <= 5:
             level_info = self.levels[self.current_level]
 
-            # Storyline integration for each level
+            # Enhanced storyline integration for each level
             if self.current_level == 1:
-                print(f"\n🏢 LEVEL {self.current_level}: {level_info['name']}")
-                print("📜 GESCHICHTE: Dein Onkel war paranoid wegen physischem Zugang.")
-                print("Er hat den ersten Zugangscode in einer geheimen Datei auf seinem Server versteckt.")
-                print("Du musst Web Application Reconnaissance lernen, um ihn zu finden.")
+                self.simulate_old_terminal(f"\n🏢 LEVEL {self.current_level}: DAS ERSTE SIEGEL", delay=0.02)
+                self.simulate_old_terminal("📜 GESCHICHTE: Du stehst im Arbeitszimmer deines Onkels.", delay=0.02)
+                self.simulate_old_terminal("Der Raum ist voller alter Computer und Server-Racks.", delay=0.02)
+                self.simulate_old_terminal("Auf dem Schreibtisch liegt eine verschlüsselte Nachricht:", delay=0.02)
+                self.simulate_old_terminal("'Das erste Siegel ist in meinem persönlichen Labor versteckt.'", delay=0.02)
+                self.simulate_old_terminal("'Finde es, und du wirst verstehen, warum ich paranoid war.'", delay=0.02)
+                self.simulate_old_terminal("\n🎯 MISSION: Führe Web Application Reconnaissance durch!", delay=0.02)
+                self.simulate_old_terminal("🔍 Finde die versteckte .env-Datei mit dem ersten Code!", delay=0.02)
             elif self.current_level == 2:
-                print(f"\n🌐 LEVEL {self.current_level}: {level_info['name']}")
-                print("📜 GESCHICHTE: Der Server hat mehrere versteckte Services laufen.")
-                print("Du musst Network Discovery-Techniken lernen, um den API-Key zu finden.")
+                self.simulate_old_terminal(f"\n🌐 LEVEL {self.current_level}: NETZWERK DER SCHATTEN", delay=0.02)
+                self.simulate_old_terminal("📜 GESCHICHTE: Du hast das erste Siegel gebrochen!", delay=0.02)
+                self.simulate_old_terminal("Aber dein Onkel hatte noch mehr Geheimnisse.", delay=0.02)
+                self.simulate_old_terminal("Sein Server läuft mit Harrington Industries' proprietärem Netzwerk.", delay=0.02)
+                self.simulate_old_terminal("Die Konkurrenten versuchen bereits, sich einzuhacken.", delay=0.02)
+                self.simulate_old_terminal("'Das Netzwerk ist mein Meisterwerk,' flüsterte er einmal.", delay=0.02)
+                self.simulate_old_terminal("'Nur die Würdigen können es knacken.'", delay=0.02)
+                self.simulate_old_terminal("\n🎯 MISSION: Führe Network Discovery durch!", delay=0.02)
+                self.simulate_old_terminal("🔍 Finde den versteckten API-Key im Netzwerk!", delay=0.02)
             elif self.current_level == 3:
-                print(f"\n🔐 LEVEL {self.current_level}: {level_info['name']}")
-                print("📜 GESCHICHTE: Das Login-System deines Onkels hat einen kritischen Fehler.")
-                print("Verwende SQL Injection, um die Authentifizierung zu umgehen und Admin-Zugang zu bekommen.")
+                self.simulate_old_terminal(f"\n🔐 LEVEL {self.current_level}: DIE DATENBANK DER GEHEIMNISSE", delay=0.02)
+                self.simulate_old_terminal("📜 GESCHICHTE: Das Netzwerk öffnet sich vor dir.", delay=0.02)
+                self.simulate_old_terminal("Du findest eine verschlüsselte Datenbank voller dunkler Geheimnisse.", delay=0.02)
+                self.simulate_old_terminal("Hier sind alle 'schmutzigen' Geschäfte von Harrington Industries gespeichert.", delay=0.02)
+                self.simulate_old_terminal("Dein Onkel wusste, dass nur jemand mit reinem Herzen sie finden würde.", delay=0.02)
+                self.simulate_old_terminal("'Die Datenbank enthält die Wahrheit über meine Feinde,' sagte er.", delay=0.02)
+                self.simulate_old_terminal("'Aber sie ist mit SQL-Injection verwundbar - absichtlich.'", delay=0.02)
+                self.simulate_old_terminal("\n🎯 MISSION: Führe SQL Injection Attack durch!", delay=0.02)
+                self.simulate_old_terminal("🔍 Extrahiere den Admin-Hash aus der Datenbank!", delay=0.02)
             elif self.current_level == 4:
-                print(f"\n💬 LEVEL {self.current_level}: {level_info['name']}")
-                print("📜 GESCHICHTE: Das Admin-Panel hat ein verwundbares Kommentar-System.")
-                print("Verwende XSS, um den Session-Cookie des Admins zu stehlen.")
+                self.simulate_old_terminal(f"\n💬 LEVEL {self.current_level}: DER DIGITALE SPIEGEL", delay=0.02)
+                self.simulate_old_terminal("📜 GESCHICHTE: Die Datenbank öffnet ihre Tore.", delay=0.02)
+                self.simulate_old_terminal("Du findest ein altes Kommentar-System - 'Digitaler Spiegel' genannt.", delay=0.02)
+                self.simulate_old_terminal("Dein Onkel erschuf es, um die wahre Natur eines Menschen zu reflektieren.", delay=0.02)
+                self.simulate_old_terminal("'Wenn jemand XSS versucht, zeigt es seine wahre Absicht,' sagte er.", delay=0.02)
+                self.simulate_old_terminal("Die Konkurrenten versuchen bereits, sich einzuschleichen.", delay=0.02)
+                self.simulate_old_terminal("Du hörst Schritte im Flur - sie kommen näher!", delay=0.02)
+                self.simulate_old_terminal("\n🎯 MISSION: Führe XSS Attack durch!", delay=0.02)
+                self.simulate_old_terminal("🔍 Stehle den Session-Cookie des Admins!", delay=0.02)
             elif self.current_level == 5:
-                print(f"\n🎯 LEVEL {self.current_level}: {level_info['name']}")
-                print("📜 GESCHICHTE: Du hast die finale Kammer erreicht!")
-                print("Der Master-Encryption-Key ist hinter mehreren Sicherheitsebenen versteckt.")
+                self.simulate_old_terminal(f"\n🎯 LEVEL {self.current_level}: Project Echo", delay=0.02)
+                self.simulate_old_terminal("📜 GESCHICHTE: Du hast alle Siegel gebrochen!", delay=0.02)
+                self.simulate_old_terminal("Vor dir liegt die finale Kammer - Project Echo.", delay=0.02)
+                self.simulate_old_terminal("Die KI, die die Menschheit vor digitalen Katastrophen retten sollte.", delay=0.02)
+                self.simulate_old_terminal("Aber sie wurde sabotiert. Von den gleichen Konkurrenten.", delay=0.02)
+                self.simulate_old_terminal("'Phoenix wird die Welt verändern,' sagte dein Onkel.", delay=0.02)
+                self.simulate_old_terminal("'Aber nur, wenn die richtige Person sie befreit.'", delay=0.02)
+                self.simulate_old_terminal("Die Tür zur Kammer öffnet sich. Die Konkurrenten brechen ein!", delay=0.02)
+                self.simulate_old_terminal("\n🎯 MISSION: Führe Digital Forensics durch!", delay=0.02)
+                self.simulate_old_terminal("🔍 Finde den Master-Encryption-Key und rette Project Echo!", delay=0.02)
 
             print(f"\n📋 Description: {level_info['description']}")
             print(f"💰 Score: {self.score}")
@@ -1479,7 +1650,7 @@ class HackingGame:
         self.current_level = 3
 
     def level_3_password_cracking(self):
-        """Level 3: SQL Injection Attack with real server communication"""
+        """Level 3: SQL Injection Attack with real server communication - REALISTIC APPROACH"""
         self.simulate_old_terminal("\n🔐 MISSION: Führe eine umfassende SQL Injection Attack durch!", delay=0.02)
         self.simulate_old_terminal("💡 TIPP: Lerne echte SQL Injection-Techniken!", delay=0.02)
         self.echo_chat("hint")
@@ -1511,6 +1682,15 @@ class HackingGame:
         print(f"\n🔍 ZIEL: Finde den Admin-Hash: {target_value[:8]}...")
         print("💻 Verwende verschiedene SQL Injection-Techniken")
 
+        print("\n🎯 REALISTISCHE METHODEN:")
+        print("   • Browser: Gehe zu http://127.0.0.1:5000/login und gib Payload in Username-Feld ein")
+        print("   • Curl: curl -X POST -d 'username=PAYLOAD&password=test' http://127.0.0.1:5000/login")
+        print("   • Beide Methoden funktionieren gleich - wähle was dir lieber ist!")
+        print("\n🎯 BEISPIEL-PAYLOADS:")
+        print("   • admin' OR '1'='1' --")
+        print("   • admin' UNION SELECT 1,2,3 --")
+        print("   • ' OR 1=1 --")
+
         while True:
             print("\n💡 VERFÜGBARE TECHNIQUEN:")
             print("  - Union-based SQL Injection")
@@ -1523,45 +1703,68 @@ class HackingGame:
             print("  - Business Logic: curl -X POST -d 'product_id=1&quantity=5&price=-100' http://127.0.0.1:5000/business-logic")
             print("  - Auth Bypass: curl -X POST -d 'user_id=1' http://127.0.0.1:5000/auth-bypass")
 
-            payload = input("\nGib deine SQL Injection ein: ").strip()
+            cmd = input("\nGib deinen SQL Injection Befehl ein (Browser oder curl): ").strip()
 
-            if payload == "/echo":
+            if cmd == "/echo":
                 self.echo_chat("hint")
                 continue
-            elif payload == "/help":
+            elif cmd == "/help":
                 self.show_level_help(3)
                 continue
 
             # Auto-convert simple URLs to curl commands for better UX
-            if payload.startswith("http://") or payload.startswith("http://"):
-                payload = f"curl -s {payload}"
-                print(f"💡 Auto-converting to: {payload}")
+            if cmd.startswith("http://") or cmd.startswith("http://"):
+                cmd = f"curl -s {cmd}"
+                print(f"💡 Auto-converting to: {cmd}")
 
             try:
-                # Test SQL injection with curl
-                cmd = f"curl -X POST -d 'username={payload}&password=anything' http://127.0.0.1:5000/login"
+                # Execute the command with proper encoding handling
                 result = subprocess.run(cmd, shell=True, capture_output=True, text=True,
                                     timeout=15, encoding='utf-8', errors='replace')
 
-                print("📄 SERVER ANTWORT:")
-                if result.stdout:
-                    print(result.stdout)
+                # Show realistic command output
+                print(f"\n💻 {self.player_name}@hacking-target:~$ {cmd}")
+
+                # Enhanced curl command handling with real server communication
+                if "curl" in cmd.lower() and ("127.0.0.1:5000" in cmd or "localhost:5000" in cmd):
+                    server_response = self.execute_curl_command(cmd)
+                    if server_response:
+                        print("📄 SERVER ANTWORT:")
+                        print(server_response)
+
+                        # Check for success indicators in real server response
+                        if self.check_level_success(3, server_response, cmd):
+                            print("\n🎉 ERFOLG! SQL Injection hat funktioniert!")
+                            print("🏆 Level 3 abgeschlossen! +200 Punkte")
+                            print("\n📚 WAS DU GELERNT HAST:")
+                            print("   • Union-based SQL Injection")
+                            print("   • Blind SQL Injection (Boolean & Time-based)")
+                            print("   • Error-based SQL Injection")
+                            print("   • Database Schema Enumeration")
+                            print("   • Data Extraction Techniques")
+                            print("\n🛡️ SO KANNST DU DICH DAVOR SCHÜTZEN:")
+                            print("   • Prepared Statements verwenden (niemals String-Konkatenation)")
+                            print("   • Input-Validierung und -Sanitization")
+                            print("   • ORM-Frameworks verwenden")
+                            print("   • Least Privilege Principle für DB-User")
+                            print("   • WAF (Web Application Firewall) einsetzen")
+                            self.score += 200
+                            break
+                    else:
+                        print("📄 (Keine Antwort vom Server)")
                 else:
-                    print("(Keine Ausgabe)")
+                    # Handle non-curl commands
+                    if result.stdout:
+                        print("📄 AUSGABE:")
+                        print(result.stdout)
+                    elif result.stderr and result.stderr.strip() and not result.stderr.startswith('  % Total'):
+                        print("⚠️  FEHLER:")
+                        print(result.stderr)
+                    else:
+                        print("📄 (Keine Ausgabe)")
 
-                # Only show error if there's actual stderr content (not just curl progress info)
-                if result.stderr and result.stderr.strip() and not result.stderr.startswith('  % Total'):
-                    print("⚠️  FEHLER:")
-                    print(result.stderr)
-
-                # Enhanced success checking with real server response
-                server_response = self.execute_curl_command(cmd)
-                if server_response:
-                    print("📄 ECHTE SERVER ANTWORT:")
-                    print(server_response)
-
-                    # Check for success indicators in real server response
-                    if self.check_level_success(3, server_response, cmd):
+                    # Check for success in non-curl command output
+                    if self.check_level_success(3, result.stdout or "", cmd):
                         print("\n🎉 ERFOLG! SQL Injection hat funktioniert!")
                         print("🏆 Level 3 abgeschlossen! +200 Punkte")
                         print("\n📚 WAS DU GELERNT HAST:")
@@ -1578,8 +1781,6 @@ class HackingGame:
                         print("   • WAF (Web Application Firewall) einsetzen")
                         self.score += 200
                         break
-
-
 
             except subprocess.TimeoutExpired:
                 print("⏰ Request ist abgelaufen.")
