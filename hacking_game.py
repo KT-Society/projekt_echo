@@ -636,28 +636,7 @@ class HackingGame:
         banner = """
 ╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
-║  ██╗  ██╗ █████╗  ██████╗██╗  ██╗██╗███╗   ██╗ ██████╗      ║
-║  ██║  ██║██╔══██╗██╔════╝██║ ██╔╝██║████╗  ██║██╔════╝      ║
-║  ███████║███████║██║     █████╔╝ ██║██╔██╗ ██║██║  ███╗     ║
-║  ██╔══██║██╔══██║██║     ██╔═██╗ ██║██║╚██╗██║██║   ██║     ║
-║  ██║  ██║██║  ██║╚██████╗██║  ██╗██║██║ ╚████║╚██████╔╝     ║
-║  ╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝      ║
-║                                                              ║
-║  ███████╗ ██████╗██╗   ██╗███████╗██████╗  ██████╗ ██╗      ║
-║  ██╔════╝██╔════╝╚██╗ ██╔╝██╔════╝██╔══██╗██╔═══██╗██║      ║
-║  ███████╗██║      ╚████╔╝ █████╗  ██████╔╝██║   ██║██║      ║
-║  ╚════██║██║       ╚██╔╝  ██╔══╝  ██╔══██╗██║   ██║██║      ║
-║  ███████║╚██████╗   ██║   ███████╗██║  ██║╚██████╔╝███████╗ ║
-║  ╚══════╝ ╚═════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝ ╚═════╝ ╚══════╝ ║
-║                                                              ║
-║  ██████╗ ██████╗ ██╗   ██╗██████╗                            ║
-║  ██╔══██╗██╔═══██╗██║   ██║██╔══██╗                           ║
-║  ██████╔╝██║   ██║██║   ██║██████╔╝                           ║
-║  ██╔═══╝ ██║   ██║██║   ██║██╔═══╝                            ║
-║  ██║     ╚██████╔╝╚██████╔╝██║                                ║
-║  ╚═╝      ╚═════╝  ╚═════╝ ╚═╝                                ║
-║                                                              ║
-║  [ECHO'S ULTIMATE HACKING SIMULATOR v2.0]                    ║
+║  [ECHO'S ULTIMATE HACKING SIMULATOR BETA v1.0.0]                    ║
 ║  [EDUCATIONAL PURPOSE ONLY - NO REAL HACKING]                ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
@@ -767,16 +746,11 @@ class HackingGame:
                     self.typewriter_effect("⚠️  FEHLER:", delay=0.02, color_code="31")
                     self.typewriter_effect(result.stderr, delay=0.01, color_code="31")
 
-                # Check for various success indicators
+                # Check for specific success indicators - only real API key finds
                 success_indicators = [
                     target_value in (result.stdout or ""),
                     "API_KEY" in (result.stdout or ""),
-                    "api_key" in (result.stdout or ""),
-                    "environment" in (result.stdout or "").lower(),
-                    "config" in (result.stdout or "").lower(),
-                    "secret" in (result.stdout or "").lower(),
-                    "debug" in (result.stdout or "").lower(),
-                    "admin" in (result.stdout or "").lower()
+                    "api_key" in (result.stdout or "")
                 ]
 
                 if any(success_indicators):
