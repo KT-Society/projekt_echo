@@ -55,7 +55,6 @@ player_progress.json
 *.tar.gz
 
 # Database files
-*.db
 *.sqlite
 *.sqlite3
 
