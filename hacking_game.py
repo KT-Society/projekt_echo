@@ -358,7 +358,7 @@ class HackingGame:
             print("\n1. Spiel starten/fortsetzen")
             print("2. Fortschritt anzeigen")
             print("3. Einstellungen")
-            print("4. Mit Echo sprechen (/echo)")
+            print("4. Mit Echo sprechen (/echo) (coming soon)")
             print("5. Beenden")
 
             try:
