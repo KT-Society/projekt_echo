@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Documents - Hacking Target</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .document { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .classification { font-weight: bold; color: #d63384; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>[DOCUMENTS] Available Documents</h1>
+        {% for doc in documents %}
+        <div class="document">
+            <h3>{{ doc[0] }}</h3>
+            <p>Classification: <span class="classification">{{ doc[1] }}</span></p>
+            <p><a href="/api/documents/{{ doc[0] }}">View Content</a></p>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

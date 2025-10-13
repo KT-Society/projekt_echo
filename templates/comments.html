@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Comments - Hacking Target</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .comment { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .comment-form { background: #e3f2fd; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .form-group { margin: 10px 0; }
+        textarea { width: 100%; height: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 3px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 3px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>[COMMENTS] Comments System</h1>
+        <div class="comment-form">
+            <h3>Add Comment</h3>
+            <form method="POST">
+                <div class="form-group">
+                    <textarea name="comment" placeholder="Enter your comment..." required></textarea>
+                </div>
+                <button type="submit">Post Comment</button>
+            </form>
+            <p><small>Hint: Try XSS payloads...</small></p>
+        </div>
+        <h3>Recent Comments</h3>
+        {% for comment in comments %}
+        <div class="comment">
+            <strong>{{ comment[0] }}</strong> ({{ comment[2] }})
+            <p>{{ comment[1] | safe }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

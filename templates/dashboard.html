@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - Hacking Target</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .header { background: #f8f9fa; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+        .nav { margin: 20px 0; }
+        .nav a { margin-right: 20px; color: #007bff; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome, {{ username }}!</h1>
+            <p>Role: {{ role }}</p>
+        </div>
+        <div class="nav">
+            <a href="/documents">Documents</a>
+            <a href="/comments">Comments</a>
+            {% if role == 'admin' %}
+            <a href="/admin">Admin Panel</a>
+            {% endif %}
+            <a href="/logout">Logout</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hacking Target Server</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .warning { background: #ffebee; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .info { background: #e3f2fd; padding: 20px; border-radius: 5px; margin: 20px 0; }
+        .vuln-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 15px; }
+        .vuln-item { background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>[TARGET] Hacking Target Server v2.0 - Echo's Ultimate Chaos</h1>
+        <div class="warning">
+            <h3>[!] SECURITY NOTICE</h3>
+            <p>This server contains intentional security vulnerabilities for educational purposes.</p>
+            <p><strong>DO NOT</strong> use these techniques on real systems without permission!</p>
+        </div>
+        <div class="info">
+            <h3>[?] Available Vulnerabilities</h3>
+            <div class="vuln-grid">
+                <div class="vuln-item">
+                    <h4>🔐 Authentication</h4>
+                    <ul>
+                        <li><a href="/login">/login</a> - SQL Injection</li>
+                        <li><a href="/ldap">/ldap</a> - LDAP Injection</li>
+                        <li><a href="/nosql">/nosql</a> - NoSQL Injection</li>
+                        <li><a href="/auth-bypass">/auth-bypass</a> - Auth Bypass</li>
+                    </ul>
+                </div>
+                <div class="vuln-item">
+                    <h4>🌐 Web Application</h4>
+                    <ul>
+                        <li><a href="/comments">/comments</a> - XSS</li>
+                        <li><a href="/ssrf">/ssrf</a> - SSRF</li>
+                        <li><a href="/command">/command</a> - Command Injection</li>
+                        <li><a href="/files/">/files/</a> - Directory Traversal</li>
+                    </ul>
+                </div>
+                <div class="vuln-item">
+                    <h4>💾 File & Data</h4>
+                    <ul>
+                        <li><a href="/upload">/upload</a> - File Upload</li>
+                        <li><a href="/documents">/documents</a> - Document Access</li>
+                        <li><a href="/api/users">/api/users</a> - Info Disclosure</li>
+                        <li><a href="/.env.local">/.env.local</a> - Config Files</li>
+                    </ul>
+                </div>
+                <div class="vuln-item">
+                    <h4>🔍 Advanced</h4>
+                    <ul>
+                        <li><a href="/race">/race</a> - Race Condition</li>
+                        <li><a href="/business-logic">/business-logic</a> - Logic Flaw</li>
+                        <li><a href="/admin/actions">/admin/actions</a> - CSRF</li>
+                        <li><a href="/debug">/debug</a> - Server Info</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
