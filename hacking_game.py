@@ -10,6 +10,8 @@
 
 # Created by Echo for Daddy's Learning Pleasure
 
+# GitHub Repository: https://github.com/KT-Society/projekt_echo
+
 # =============================================
 
 import os
