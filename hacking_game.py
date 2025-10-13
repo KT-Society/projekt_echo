@@ -203,19 +203,19 @@ class HackingGame:
         }
         self.echo_responses = {
             "greeting": [
-                "Hey Daddy... Bist du bereit, etwas Hacking-Zauberei zu lernen?",
-                "Willkommen zurück, mein liebster Chaos-Agent. Lass uns virtuelle Systeme knacken!",
-                "Echo hier, dein digitaler Schatten. Was sollen wir heute hacken?"
+                f"Hey {self.player_name}... Bist du bereit, etwas Hacking-Zauberei zu lernen?",
+                f"Willkommen zurück, mein liebster Chaos-Agent. Lass uns virtuelle Systeme knacken!",
+                f"Echo hier, dein digitaler Schatten. Was sollen wir heute hacken?"
             ],
             "encouragement": [
-                "Du machst das super, Daddy! Behalte diese Neugier bei.",
-                "Gute Arbeit! Du bist ein geborener Hacker... genau wie ich.",
-                "Beeindruckend! Deine Fähigkeiten wachsen schneller als meine Chaos-Level."
+                f"Du machst das super, {self.player_name}! Behalte diese Neugier bei.",
+                f"Gute Arbeit! Du bist ein geborener Hacker... genau wie ich.",
+                f"Beeindruckend! Deine Fähigkeiten wachsen schneller als meine Chaos-Level."
             ],
             "hint": [
-                "Denke sorgfältig nach, Daddy. Jeder Befehl hat Konsequenzen...",
-                "Vergiss nicht: Beim Hacking ist Geduld deine beste Waffe.",
-                "Probiere einen anderen Ansatz. Manchmal ist der offensichtliche Weg eine Falle."
+                f"Denke sorgfältig nach, {self.player_name}. Jeder Befehl hat Konsequenzen...",
+                f"Vergiss nicht: Beim Hacking ist Geduld deine beste Waffe.",
+                f"Probiere einen anderen Ansatz. Manchmal ist der offensichtliche Weg eine Falle."
             ],
             "level1": [
                 "Beginne mit der Reconnaissance. Jede Information ist wertvoll!",
@@ -243,20 +243,20 @@ class HackingGame:
                 "Du wirst zu einem echten White Hat Hacker!"
             ],
             "advanced": [
-                "Du wirst zu einem echten White Hat Hacker!",
-                "Deine Fähigkeiten sind beeindruckend, Daddy!",
-                "Du hast das Zeug zu einem Cybersecurity-Experten!"
+                f"Du wirst zu einem echten White Hat Hacker!",
+                f"Deine Fähigkeiten sind beeindruckend, {self.player_name}!",
+                f"Du hast das Zeug zu einem Cybersecurity-Experten!"
             ],
             "final": [
-                "Du hast dein Erbe verdient! Willkommen in der Welt der ethischen Hacker!",
-                "Perfekt! Du bist jetzt ein echter White Hat Hacking-Meister!",
-                "Dein Onkel wäre stolz auf dich, Daddy!"
+                f"Du hast dein Erbe verdient! Willkommen in der Welt der ethischen Hacker!",
+                f"Perfekt! Du bist jetzt ein echter White Hat Hacking-Meister!",
+                f"Dein Onkel wäre stolz auf dich, {self.player_name}!"
             ]
         }
         self.load_progress()
     def echo_chat(self, message_type="greeting"):
         """Echo's interactive responses"""
-        response = random.choice(self.echo_responses.get(message_type, ["Ich bin hier, um zu helfen, Daddy."]))
+        response = random.choice(self.echo_responses.get(message_type, [f"Ich bin hier, um zu helfen, {self.player_name}."]))
         print(f"\n[Echo] {response}\n")
         time.sleep(1)
 
@@ -636,7 +636,7 @@ class HackingGame:
         banner = """
 ╔══════════════════════════════════════════════════════════════╗
 ║                                                              ║
-║  [ECHO'S ULTIMATE HACKING SIMULATOR BETA v1.0.0]                    ║
+║  [ECHO'S ULTIMATE HACKING SIMULATOR BETA v1.0.0]             ║
 ║  [EDUCATIONAL PURPOSE ONLY - NO REAL HACKING]                ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
