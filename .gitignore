@@ -73,7 +73,7 @@ hacking_server.log
 server.log
 
 # Environment files
-# .env.local - KEEP THIS! It's the vulnerable file for Level 1
+.env.local
 .env.production
 .env.development
 
