@@ -1,0 +1,1 @@
+# Endpoint: /account/my-models/models\n\n## Method: POST\n\n**Summary:** List Upstream Models\n\n**Description:** Fetch OpenAI-compatible upstream model IDs from a provider before registering a My Models endpoint. Limited to one probe every 30 seconds per account. API keys require `account:keys`.\n\n

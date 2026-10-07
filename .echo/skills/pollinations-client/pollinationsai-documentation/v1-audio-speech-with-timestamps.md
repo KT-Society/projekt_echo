@@ -1,0 +1,1 @@
+# Endpoint: /v1/audio/speech/with-timestamps\n\n## Method: POST\n\n**Summary:** Generate Speech with Timestamps\n\n**Description:** Generate base64-encoded speech with character-level timing for the original and normalized text. Supports the elevenlabs, elevenflash, and eleven-multilingual-v2 models.\n\n

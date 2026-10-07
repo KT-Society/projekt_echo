@@ -1,0 +1,1 @@
+# Endpoint: /quests/catalog\n\n## Method: GET\n\n**Summary:** Get Quest Catalog\n\n**Description:** Returns product quests and GitHub issue quest instances in one list.\n\n

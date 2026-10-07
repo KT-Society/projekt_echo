@@ -1,0 +1,3 @@
+# Endpoint: /upload\n\n## Method: POST\n\n**Summary:** Upload media\n\n**Description:** Upload an image, audio, or video file via multipart/form-data (field `file`) or application/json (base64 `data`). Returns a unique id and its retrieval URL; each upload gets its own id (re-uploading the same bytes yields a new one). Files are retained for 30 days.
+
+**Tags publish.** An optional `tags` field publishes the upload into each tag's public gallery (GET /media?tag=…), where anyone can see it. Untagged uploads stay unlisted: reachable only by their unguessable id URL, never listed anywhere. **Alpha:** the publish tagging is new and may still change.\n\n## Method: SERVERS\n\n**Summary:** N/A\n\n**Description:** N/A\n\n

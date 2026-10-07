@@ -1,0 +1,1 @@
+# Endpoint: /account/earnings/transactions\n\n## Method: GET\n\n**Summary:** Get Earnings Transactions\n\n**Description:** Returns recent per-request earnings transactions, newest first. Requires `account:usage` permission when using API keys.\n\n### Parameters\n\n- **limit** (query): N/A\n- **days** (query): N/A\n- **granularity** (query): N/A\n- **period** (query): N/A\n\n

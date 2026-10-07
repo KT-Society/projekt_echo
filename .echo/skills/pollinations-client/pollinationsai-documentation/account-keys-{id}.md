@@ -1,0 +1,1 @@
+# Endpoint: /account/keys/{id}\n\n## Method: DELETE\n\n**Summary:** Revoke API Key\n\n**Description:** Delete/revoke an API key. Requires `account:keys` permission when using API keys. Cannot revoke the key used to authenticate the request.\n\n### Parameters\n\n- **id** (path): N/A\n\n

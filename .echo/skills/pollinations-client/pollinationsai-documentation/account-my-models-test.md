@@ -1,0 +1,1 @@
+# Endpoint: /account/my-models/test\n\n## Method: POST\n\n**Summary:** Test My Model Endpoint\n\n**Description:** Test an OpenAI-compatible upstream model before registering it. Image tests detect the image pricing mode and probe the derived `/images/edits` endpoint. Limited to one probe every 30 seconds per account. API keys require `account:keys`.\n\n

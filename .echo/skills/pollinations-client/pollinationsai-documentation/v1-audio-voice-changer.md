@@ -1,0 +1,1 @@
+# Endpoint: /v1/audio/voice-changer\n\n## Method: POST\n\n**Summary:** Transform a Voice\n\n**Description:** Transform the speaker identity in an audio file while preserving its words, timing, emotion, and delivery. Accepts preset voice names or custom ElevenLabs voice IDs.\n\n

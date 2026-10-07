@@ -1,0 +1,1 @@
+# Endpoint: /account/my-models/provider\n\n## Method: POST\n\n**Summary:** Update Community Provider Profile\n\n**Description:** Set the public provider name and HTTPS service link shared by all community models owned by the authenticated account. Send both fields empty to clear the profile. Publishing approval and `account:keys` are required.\n\n

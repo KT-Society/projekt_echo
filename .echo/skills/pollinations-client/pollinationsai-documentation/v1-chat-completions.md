@@ -1,0 +1,3 @@
+# Endpoint: /v1/chat/completions\n\n## Method: POST\n\n**Summary:** Chat Completions\n\n**Description:** Generate text responses using AI models. Fully compatible with the OpenAI Chat Completions API — use any OpenAI SDK by pointing it to `https://gen.pollinations.ai`.
+
+Supports streaming, function calling, vision (image input), structured outputs, and reasoning/thinking modes depending on the model.\n\n

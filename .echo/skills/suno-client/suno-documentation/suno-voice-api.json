@@ -1,0 +1,699 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Suno Voice API",
+    "description": "API documentation for Suno Voice custom voice services",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Technical Support",
+      "email": "support@sunoapi.org"
+    }
+  },
+  "tags": [
+    {
+      "name": "docs"
+    },
+    {
+      "name": "docs/en"
+    },
+    {
+      "name": "docs/en/Market"
+    },
+    {
+      "name": "docs/en/Market/Suno API"
+    },
+    {
+      "name": "docs/en/Market/Suno API/voice"
+    },
+    {
+      "name": "suno接口/voice"
+    }
+  ],
+  "paths": {
+    "/api/v1/voice/validate": {
+      "post": {
+        "summary": "Suno Voice Generate Verification Phrase API",
+        "deprecated": false,
+        "description": "Generate a validation phrase for the Suno Voice custom voice workflow.\n\nSubmit the source audio URL and the selected vocal segment. The system will analyze the source voice and create a validation phrase for the user to record in the next step.\n\n## Query Task Status\n\nAfter submitting the task, you can check the validation phrase generation progress and obtain the generated phrase through the validation phrase query endpoint:\n\n<Card\n  title=\"Get Validation Phrase\"\n  icon=\"lucide-search\"\n  href=\"/suno-api/suno-voice-validate-info\"\n>\n  Learn how to check the validation phrase task status and obtain the phrase users should record\n</Card>\n\n:::tip[]\nIn the production environment, it is recommended to use the `callBackUrl` parameter to receive automatic notifications when the validation phrase is ready, rather than polling the status endpoint.\n:::\n\n## Next Step\n\nAfter the validation phrase is ready, ask the user to record the phrase and upload the verification audio to continue creating the voice. For best voice generation results, singing is recommended.\n\n<Card\n  title=\"Generate Voice\"\n  icon=\"lucide-mic\"\n  href=\"/suno-api/suno-voice-generate\"\n>\n  Submit the verification audio and generate the final custom voice\n</Card>\n\nRelated resources\n\n<CardGroup cols={2}>\n  <Card title=\"Regenerate Validation Phrase\" icon=\"lucide-refresh-cw\" href=\"/suno-api/suno-voice-regenerate\"> Generate a new validation phrase for an existing task </Card>\n  <Card title=\"General API\" icon=\"lucide-cog\" href=\"/suno-api/get-remaining-credits\"> View account credits and usage </Card>\n</CardGroup>\n",
+        "operationId": "suno-voice-validate",
+        "tags": [
+          "docs/en/Market/Suno API/voice",
+          "suno接口/voice"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "voiceUrl": {
+                    "description": "The original recording URL uploaded by the user [Required]",
+                    "type": "string"
+                  },
+                  "vocalStartS": {
+                    "description": "Start time (in seconds) for extracting the vocal segment [Required]",
+                    "type": "integer"
+                  },
+                  "vocalEndS": {
+                    "description": "End time (in seconds) for extracting the vocal segment, must be greater than vocalStartS [Required]",
+                    "type": "integer"
+                  },
+                  "language": {
+                    "description": "Verify the language of the short phrase. Supported languages ​​include: English (en), Chinese (zh), Spanish (es), French (fr), Portuguese (pt), German (de), Japanese (ja), Korean (ko), Hindi (hi), and Russian (ru).",
+                    "type": "string"
+                  },
+                  "callBackUrl": {
+                    "description": "Callback URL used to receive validation phrase generation results. The system sends a POST request when the phrase is ready (`status: wait_validating`) or when the task fails. The URL must be publicly accessible and return HTTP 200 within 15 seconds. For the payload format, see [Validation Phrase Callbacks](https://docs.sunoapi.org/suno-api/suno-voice-validate-callbacks).",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "voiceUrl",
+                  "vocalStartS",
+                  "vocalEndS"
+                ]
+              },
+              "example": {
+                "voiceUrl": "https://example.com/audio/user_voice.mp3",
+                "vocalStartS": 0,
+                "vocalEndS": 10,
+                "language": "en",
+                "callBackUrl": "https://example.com/callback/suno/voice_prepare"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "description": "Task ID",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "taskId"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "success",
+                  "data": {
+                    "taskId": "xxx_task_id_xxx"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "BearerAuth1": []
+          }
+        ]
+      }
+    },
+    "/api/v1/voice/validate-info": {
+      "get": {
+        "summary": "Suno Voice Get Verification Phrase API",
+        "deprecated": false,
+        "description": "Query the validation phrase generation result for a Suno Voice task.\n\nUse this endpoint with the `taskId` returned by the validation phrase generation or regeneration endpoint. When the task is ready, the response contains `validateInfo`, which is the phrase the user should record for voice verification.\n\n## Status Handling\n\nCheck the `status` field to determine the next action:\n\n- `wait_processing` or `processing_validate`: the validation phrase is still being generated\n- `processing_validate_fail` or `fail`: the task failed, check `errorMessage` for details\n- `wait_validating`: the phrase is ready and waiting for the user to record verification audio\n- `success`: the validation and voice creation flow has completed\n\n## Continue the Flow\n\nAfter receiving `validateInfo`, record or upload audio of the user performing that phrase and submit it to the voice generation endpoint. For best voice generation results, singing is recommended.\n\n<Card\n  title=\"Generate Voice\"\n  icon=\"lucide-mic\"\n  href=\"/suno-api/suno-voice-generate\"\n>\n  Submit the user's verification audio to generate the final custom voice\n</Card>\n\nRelated resources\n\n<CardGroup cols={2}>\n  <Card title=\"Generate Validation Phrase\" icon=\"lucide-file-audio\" href=\"/suno-api/suno-voice-validate\"> Create a validation phrase from source audio </Card>\n  <Card title=\"Regenerate Validation Phrase\" icon=\"lucide-refresh-cw\" href=\"/suno-api/suno-voice-regenerate\"> Generate a new phrase for an existing task </Card>\n</CardGroup>\n",
+        "operationId": "suno-voice-validate-info",
+        "tags": [
+          "docs/en/Market/Suno API/voice",
+          "suno接口/voice"
+        ],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "query",
+            "description": "任务id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string",
+                          "description": "Task ID"
+                        },
+                        "validateInfo": {
+                          "type": "string",
+                          "description": "Validation phrase text"
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "Task status",
+                          "enum": [
+                            "wait_processing",
+                            "processing_validate",
+                            "processing_validate_fail",
+                            "wait_validating",
+                            "success",
+                            "fail"
+                          ]
+                        },
+                        "errorCode": {
+                          "type": "integer"
+                        },
+                        "errorMessage": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "taskId",
+                        "validateInfo",
+                        "status",
+                        "errorCode",
+                        "errorMessage"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "success",
+                  "data": {
+                    "taskId": "xxx_task_id_xxx",
+                    "validateInfo": "Harmonies fill the air with joyful melodies tonight",
+                    "status": "wait_processing, processing_validate: waiting for validation code, processing_validate_fail: failed to obtain validation code, wait_validating: waiting for verification, success, fail",
+                    "errorCode": 500,
+                    "errorMessage": "xxxxx"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "BearerAuth1": []
+          }
+        ]
+      }
+    },
+    "/api/v1/voice/generate": {
+      "post": {
+        "summary": "Suno Voice Create Custom Voice API",
+        "deprecated": false,
+        "description": "Generate a custom Suno Voice from verification audio for the validation phrase returned by the server.\n\nSubmit the original validation task ID, the user's verification audio URL, and optional voice metadata such as `voiceName`, `description`, and `style`. For best voice generation results, the verification audio should contain the user recording the exact `validateInfo` phrase in a singing voice rather than plain speech. The system will validate the recording and create a reusable custom voice.\n\n## Query Task Status\n\nAfter submitting the task, you can check the voice generation progress and obtain the final `voiceId` through the voice record query endpoint:\n\n<Card\n  title=\"Get Voice Record\"\n  icon=\"lucide-search\"\n  href=\"/suno-api/suno-voice-record-info\"\n>\n  Learn how to check the custom voice generation status and obtain the generated voiceId\n</Card>\n\n:::tip[]\nIn the production environment, it is recommended to use the `callBackUrl` parameter to receive automatic notifications when the custom voice is generated, rather than polling the status endpoint.\n:::\n\n## Use the Generated Voice\n\nWhen the task succeeds, the response from the query or callback contains `voiceId`. You can use this ID in supported Suno generation endpoints that accept a custom voice.\n\nRelated resources\n\n<CardGroup cols={2}>\n  <Card title=\"Check Voice Availability\" icon=\"lucide-badge-check\" href=\"/suno-api/suno-voice-check-voice\"> Verify whether a generated voice is available for use </Card>\n  <Card title=\"General API\" icon=\"lucide-cog\" href=\"/suno-api/get-remaining-credits\"> View account credits and usage </Card>\n</CardGroup>\n",
+        "operationId": "suno-voice-generate",
+        "tags": [
+          "docs/en/Market/Suno API/voice",
+          "suno接口/voice"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "taskId": {
+                    "description": "Task ID",
+                    "type": "string"
+                  },
+                  "verifyUrl": {
+                    "description": "Audio URL for the user's recording of the validation phrase returned by the server; singing is recommended for best results [Required]",
+                    "type": "string"
+                  },
+                  "voiceName": {
+                    "description": "Voice name",
+                    "type": "string"
+                  },
+                  "description": {
+                    "description": "Voice description",
+                    "type": "string"
+                  },
+                  "style": {
+                    "description": "Voice style",
+                    "type": "string"
+                  },
+                  "singerSkillLevel": {
+                    "type": "string",
+                    "description": "Singer skill level. Supported: beginner, intermediate, advanced, professional",
+                    "default": "beginner",
+                    "enum": [
+                      "beginner",
+                      "intermediate",
+                      "advanced",
+                      "professional"
+                    ],
+                    "x-apidog-enum": [
+                      {
+                        "value": "beginner",
+                        "name": "",
+                        "description": ""
+                      },
+                      {
+                        "value": "intermediate",
+                        "name": "",
+                        "description": ""
+                      },
+                      {
+                        "value": "advanced",
+                        "name": "",
+                        "description": ""
+                      },
+                      {
+                        "value": "professional",
+                        "name": "",
+                        "description": ""
+                      }
+                    ]
+                  },
+                  "callBackUrl": {
+                    "description": "Callback URL used to receive custom voice generation results. When the task succeeds, the callback includes the generated `voiceId`; when it fails, it includes `errorCode` and `errorMessage`. The URL must be publicly accessible and return HTTP 200 within 15 seconds. For the payload format, see [Custom Voice Generation Callbacks](https://docs.sunoapi.org/suno-api/suno-voice-generate-callbacks).",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "taskId",
+                  "verifyUrl"
+                ]
+              },
+              "example": {
+                "taskId": "voice_create_001",
+                "verifyUrl": "https://example.com/audio/verify_read.mp3",
+                "voiceName": "My Voice",
+                "description": "created from uploaded voice",
+                "style": "Pop, Female Vocal",
+                "singerSkillLevel": "beginner",
+                "callBackUrl": "https://example.com/callback/suno/voice_create"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "description": "Task ID",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "taskId"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "success",
+                  "data": {
+                    "taskId": "xxx_task_id_xxx"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "BearerAuth1": []
+          }
+        ]
+      }
+    },
+    "/api/v1/voice/record-info": {
+      "get": {
+        "summary": "Suno Voice Get Custom Voice Records",
+        "deprecated": false,
+        "description": "Query the custom Suno Voice generation result.\n\nUse this endpoint with the `taskId` returned by the voice generation endpoint. When the task succeeds, the response contains `voiceId`, which can be used as the custom voice identifier in supported generation APIs.\n\n## Status Handling\n\nCheck the `status` field to determine the next action:\n\n- `wait_processing`, `processing_validate`, or `wait_validating`: the task is still being processed\n- `success`: the voice is ready, use `voiceId` for future generation requests\n- `processing_validate_fail` or `fail`: the task failed, check `errorMessage` for details\n\n## Voice Availability\n\nAfter receiving a `voiceId`, you can use the voice availability endpoint to confirm whether the generated voice can be used:\n\n<Card\n  title=\"Check Voice Availability\"\n  icon=\"lucide-badge-check\"\n  href=\"/suno-api/suno-voice-check-voice\"\n>\n  Check whether the custom voice generated by the task is available\n</Card>\n\nRelated resources\n\n<CardGroup cols={2}>\n  <Card title=\"Generate Voice\" icon=\"lucide-mic\" href=\"/suno-api/suno-voice-generate\"> Submit verification audio and create a custom voice </Card>\n  <Card title=\"General API\" icon=\"lucide-cog\" href=\"/suno-api/get-remaining-credits\"> View account credits and usage </Card>\n</CardGroup>\n",
+        "operationId": "suno-voice-record-info",
+        "tags": [
+          "docs/en/Market/Suno API/voice",
+          "suno接口/voice"
+        ],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "query",
+            "description": "任务id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer",
+                      "description": "Response status code"
+                    },
+                    "msg": {
+                      "type": "string",
+                      "description": "Response message"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string",
+                          "description": "Task ID"
+                        },
+                        "voiceId": {
+                          "type": "string",
+                          "description": "The voice ID generated by the [Suno Voice Generate Verification Phrase API](/suno-api/suno-voice-validate)"
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "Task status",
+                          "enum": [
+                            "wait_processing",
+                            "processing_validate",
+                            "processing_validate_fail",
+                            "wait_validating",
+                            "success",
+                            "fail"
+                          ]
+                        },
+                        "errorCode": {
+                          "type": "integer",
+                          "description": "Error code"
+                        },
+                        "errorMessage": {
+                          "type": "string",
+                          "description": "Detailed error message if the task failed"
+                        }
+                      },
+                      "required": [
+                        "taskId",
+                        "voiceId",
+                        "status",
+                        "errorCode",
+                        "errorMessage"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "success",
+                  "data": {
+                    "taskId": "xxx_task_id_xxx",
+                    "voiceId": "xxx",
+                    "status": "wait_processing, processing_validate: waiting for validation code, processing_validate_fail: failed to obtain validation code, wait_validating: waiting for verification, success, fail",
+                    "errorCode": 500,
+                    "errorMessage": "xxxxx"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "BearerAuth1": []
+          }
+        ]
+      }
+    },
+    "/api/v1/voice/regenerate": {
+      "post": {
+        "summary": "Suno Voice Regenerate Verification Phrase",
+        "deprecated": false,
+        "description": "Regenerate the validation phrase for an existing Suno Voice task.\n\nUse this endpoint when the previous validation phrase failed, expired, or the user needs a new phrase to record. Submit the existing `taskId`; the system will start a new validation phrase generation task and return a task ID for polling.\n\n## Query Task Status\n\nAfter submitting the regeneration task, check the new validation phrase result through the validation phrase query endpoint:\n\n<Card\n  title=\"Get Validation Phrase\"\n  icon=\"lucide-search\"\n  href=\"/suno-api/suno-voice-validate-info\"\n>\n  Learn how to check the regenerated validation phrase task status\n</Card>\n\n## Continue the Flow\n\nOnce the regenerated phrase is ready, ask the user to record the new phrase and submit the verification audio to the voice generation endpoint. For best voice generation results, singing is recommended.\n\n<Card\n  title=\"Generate Voice\"\n  icon=\"lucide-mic\"\n  href=\"/suno-api/suno-voice-generate\"\n>\n  Continue custom voice generation with the newly recorded verification audio\n</Card>\n\nRelated resources\n\n<CardGroup cols={2}>\n  <Card title=\"Generate Validation Phrase\" icon=\"lucide-file-audio\" href=\"/suno-api/suno-voice-validate\"> Start the validation phrase flow from source audio </Card>\n  <Card title=\"Get Voice Record\" icon=\"lucide-list-checks\" href=\"/suno-api/suno-voice-record-info\"> Query the final custom voice generation result </Card>\n</CardGroup>\n",
+        "operationId": "suno-voice-regenerate",
+        "tags": [
+          "docs/en/Market/Suno API/voice",
+          "suno接口/voice"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "taskId": {
+                    "description": "Task ID",
+                    "type": "string"
+                  },
+                  "calBackUrl": {
+                    "type": "string",
+                    "description": "Callback URL used to receive regenerated validation phrase results. Note that this endpoint uses the field name `calBackUrl`. The system sends a POST request when the new phrase is ready (`status: wait_validating`) or when the task fails. The URL must be publicly accessible and return HTTP 200 within 15 seconds. For the payload format, see [Regenerated Validation Phrase Callbacks](https://docs.sunoapi.org/suno-api/suno-voice-regenerate-callbacks)."
+                  }
+                },
+                "required": [
+                  "taskId",
+                  "calBackUrl"
+                ]
+              },
+              "example": {
+                "taskId": "xxxxxxx",
+                "calBackUrl": "https://example.com/callback/suno/voice_regenerate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "taskId"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "success",
+                  "data": {
+                    "taskId": "xxx_task_id_xxx"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "BearerAuth1": []
+          }
+        ]
+      }
+    },
+    "/api/v1/voice/check-voice": {
+      "post": {
+        "summary": "Suno Voice Check Availability API",
+        "deprecated": false,
+        "description": "Check whether a generated Suno custom voice is available.\n\nUse this endpoint after voice generation completes to verify that the generated voice can be used in supported Suno generation APIs. Submit the related task ID and check the `isAvailable` value in the response.\n\n## When to Use\n\nThis endpoint is useful when you need to confirm voice availability before starting a music generation request that depends on the custom voice.\n\n<Card\n  title=\"Get Voice Record\"\n  icon=\"lucide-search\"\n  href=\"/suno-api/suno-voice-record-info\"\n>\n  Query the voice generation task first to obtain the latest task status and generated voice information\n</Card>\n\nRelated resources\n\n<CardGroup cols={2}>\n  <Card title=\"Generate Voice\" icon=\"lucide-mic\" href=\"/suno-api/suno-voice-generate\"> Create a custom voice from verification audio </Card>\n  <Card title=\"General API\" icon=\"lucide-cog\" href=\"/suno-api/get-remaining-credits\"> View account credits and usage </Card>\n</CardGroup>\n",
+        "operationId": "suno-voice-check-voice",
+        "tags": [
+          "docs/en/Market/Suno API/voice",
+          "suno接口/voice"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task_id": {
+                    "description": "Task ID that needs to be checked",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "task_id"
+                ]
+              },
+              "example": {
+                "task_id": ""
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "isAvailable": {
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "isAvailable"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "success",
+                  "data": {
+                    "isAvailable": true
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "BearerAuth1": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {},
+    "responses": {},
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "API Key",
+        "description": "# API Authentication\n\nAll endpoints require authentication using Bearer Token.\n\n## Get API Key\n\n1. Visit the [API Key Management Page](https://sunoapi.org/api-key) to obtain your API Key\n\n## Usage\n\nAdd to request headers:\n\n```\nAuthorization: Bearer YOUR_API_KEY\n```\n\n> **Note:**\n> - Keep your API Key secure and do not share it with others\n> - If you suspect your API Key has been compromised, reset it immediately from the management page"
+      },
+      "BearerAuth1": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "API Key",
+        "description": "# API Authentication\n\nAll endpoints require authentication using Bearer Token.\n\n## Get API Key\n\n1. Visit the [API Key Management Page](https://sunoapi.org/api-key) to obtain your API Key\n\n## Usage\n\nAdd to request headers:\n\n```\nAuthorization: Bearer YOUR_API_KEY\n```\n\n> **Note:**\n> - Keep your API Key secure and do not share it with others\n> - If you suspect your API Key has been compromised, reset it immediately from the management page"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.sunoapi.org",
+      "description": "API Server"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ]
+}

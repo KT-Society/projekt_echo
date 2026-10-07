@@ -1,0 +1,1 @@
+# Endpoint: /account/key\n\n## Method: GET\n\n**Summary:** Get API Key Info\n\n**Description:** Returns information about the API key used in the request: validity, type (secret/publishable), expiry, permissions, and remaining budget. Useful for validating keys without making generation requests.\n\n

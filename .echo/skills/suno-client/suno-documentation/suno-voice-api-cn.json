@@ -1,0 +1,694 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Suno Voice API",
+    "description": "Suno Voice 自建音色 API 文档",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Technical Support",
+      "email": "support@sunoapi.org"
+    }
+  },
+  "tags": [
+    {
+      "name": "docs"
+    },
+    {
+      "name": "docs/zh-CN"
+    },
+    {
+      "name": "docs/zh-CN/Market"
+    },
+    {
+      "name": "docs/zh-CN/Market/Suno API"
+    },
+    {
+      "name": "docs/zh-CN/Market/Suno API/voice"
+    },
+    {
+      "name": "suno接口/voice"
+    }
+  ],
+  "paths": {
+    "/api/v1/voice/validate": {
+      "post": {
+        "summary": "Suno Voice生成验证短句接口",
+        "deprecated": false,
+        "description": "生成 Suno Voice 自建音色流程所需的验证短句。\n\n提交源音频 URL 和已选择的人声片段。系统会分析源音频中的声音，并生成一段用户后续需要录制的验证短句。\n\n## 查询任务状态\n\n提交任务后，你可以通过验证短句查询接口检查任务进度，并获取生成的验证短句：\n\n<Card\n  title=\"获取验证短句\"\n  icon=\"lucide-search\"\n  href=\"/cn/suno-api/suno-voice-validate-info\"\n>\n  了解如何查询验证短句任务状态，并获取用户需要录制的短句\n</Card>\n\n:::tip[]\n生产环境中，建议使用 `callBackUrl` 参数在验证短句生成完成后接收自动通知，而不是轮询状态接口。\n:::\n\n## 下一步\n\n验证短句生成完成后，请让用户录制该短句并上传验证音频，以继续创建自建音色。为获得更佳的音色生成效果，建议采用演唱方式录制。\n\n<Card\n  title=\"生成音色\"\n  icon=\"lucide-mic\"\n  href=\"/cn/suno-api/suno-voice-generate\"\n>\n  提交验证音频并生成最终的自建音色\n</Card>\n\n相关资源\n\n<CardGroup cols={2}>\n  <Card title=\"重新生成验证短句\" icon=\"lucide-refresh-cw\" href=\"/cn/suno-api/suno-voice-regenerate\"> 为已有任务重新生成验证短句 </Card>\n  <Card title=\"通用 API\" icon=\"lucide-cog\" href=\"/cn/suno-api/get-remaining-credits\"> 查看账户积分和使用情况 </Card>\n</CardGroup>\n",
+        "operationId": "suno-voice-validate",
+        "tags": [
+          "docs/zh-CN/Market/Suno API/voice",
+          "suno接口/voice"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "voiceUrl": {
+                    "description": "用户上传的原始录音URL[必填]",
+                    "type": "string"
+                  },
+                  "vocalStartS": {
+                    "description": "截取人声开始秒数[必填]",
+                    "type": "integer"
+                  },
+                  "vocalEndS": {
+                    "description": "截取人声结束秒数，必须大于vocal_start_s[必填]",
+                    "type": "integer"
+                  },
+                  "language": {
+                    "description": "验证短句语言,支持的语言有: en英文，zh中文，es西班牙语，fr法语，pt葡萄牙语言，de德语，ja日语，ko韩语，hi印地语，ru俄语",
+                    "type": "string"
+                  },
+                  "callBackUrl": {
+                    "description": "用于接收验证短句生成结果的回调地址。验证短句生成完成（`status: wait_validating`）或任务失败时，系统会向该地址发送 POST 请求。该地址必须可公网访问，并在 15 秒内返回 HTTP 200。回调数据格式请参考 [验证短句回调](https://docs.sunoapi.org/cn/suno-api/suno-voice-validate-callbacks)。",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "voiceUrl",
+                  "vocalStartS",
+                  "vocalEndS"
+                ]
+              },
+              "example": {
+                "voiceUrl": "https://example.com/audio/user_voice.mp3",
+                "vocalStartS": 0,
+                "vocalEndS": 10,
+                "language": "en",
+                "callBackUrl": "https://example.com/callback/suno/voice_prepare"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "description": "任务id",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "taskId"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "success",
+                  "data": {
+                    "taskId": "xxx_task_id_xxx"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/voice/validate-info": {
+      "get": {
+        "summary": "Suno Voice获取验证短句接口",
+        "deprecated": false,
+        "description": "查询 Suno Voice 任务的验证短句生成结果。\n\n使用验证短句生成接口或重新生成接口返回的 `taskId` 调用此接口。当任务准备完成后，响应中的 `validateInfo` 即为用户需要录制的验证短句。\n\n## 状态处理\n\n根据 `status` 字段判断下一步操作：\n\n- `wait_processing` 或 `processing_validate`：验证短句仍在生成中\n- `processing_validate_fail` 或 `fail`：任务失败，请查看 `errorMessage` 获取失败原因\n- `wait_validating`：验证短句已生成，等待用户录制验证音频\n- `success`：验证和音色创建流程已完成\n\n## 继续流程\n\n获取 `validateInfo` 后，请录制或上传用户完成验证短句的音频，并提交到音色生成接口。为获得更佳的音色生成效果，建议采用演唱方式录制。\n\n<Card\n  title=\"生成音色\"\n  icon=\"lucide-mic\"\n  href=\"/cn/suno-api/suno-voice-generate\"\n>\n  提交用户的验证音频并生成最终的自建音色\n</Card>\n\n相关资源\n\n<CardGroup cols={2}>\n  <Card title=\"生成验证短句\" icon=\"lucide-file-audio\" href=\"/cn/suno-api/suno-voice-validate\"> 根据源音频创建验证短句 </Card>\n  <Card title=\"重新生成验证短句\" icon=\"lucide-refresh-cw\" href=\"/cn/suno-api/suno-voice-regenerate\"> 为已有任务生成新的验证短句 </Card>\n</CardGroup>\n",
+        "operationId": "suno-voice-validate-info",
+        "tags": [
+          "docs/zh-CN/Market/Suno API/voice",
+          "suno接口/voice"
+        ],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "query",
+            "description": "任务id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string",
+                          "description": "任务id"
+                        },
+                        "validateInfo": {
+                          "type": "string",
+                          "description": "验证短句文本"
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "任务状态",
+                          "enum": [
+                            "wait_processing",
+                            "processing_validate",
+                            "processing_validate_fail",
+                            "wait_validating",
+                            "success",
+                            "fail"
+                          ]
+                        },
+                        "errorCode": {
+                          "type": "integer",
+                          "description": "错误码，任务失败时返回。"
+                        },
+                        "errorMessage": {
+                          "type": "string",
+                          "description": "错误信息，任务失败时返回。"
+                        }
+                      },
+                      "required": [
+                        "taskId",
+                        "validateInfo",
+                        "status",
+                        "errorCode",
+                        "errorMessage"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "success",
+                  "data": {
+                    "taskId": "xxx_task_id_xxx",
+                    "validateInfo": "Harmonies fill the air with joyful melodies tonight",
+                    "status": "wait_processing,processing_validate:等待验证码,processing_validate_fail:获取验证码失败,wait_validating:等待验证，success,fail",
+                    "errorCode": 500,
+                    "errorMessage": "xxxxx"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/voice/generate": {
+      "post": {
+        "summary": "Suno Voice自建音色生成接口",
+        "deprecated": false,
+        "description": "根据用户录制的服务端验证短句音频，生成 Suno Voice 自建音色。\n\n提交原验证任务 ID、用户录制验证短句后的音频 URL，以及可选的音色元信息，例如 `voiceName`、`description` 和 `style`。为获得更佳的音色生成效果，建议用户以演唱方式录制服务端返回的同一条 `validateInfo` 短句。系统会验证录音并创建可复用的自建音色。\n\n## 查询任务状态\n\n提交任务后，你可以通过自建音色记录查询接口检查音色生成进度，并获取最终的 `voiceId`：\n\n<Card\n  title=\"获取音色记录\"\n  icon=\"lucide-search\"\n  href=\"/cn/suno-api/suno-voice-record-info\"\n>\n  了解如何查询自建音色生成状态，并获取生成的 voiceId\n</Card>\n\n:::tip[]\n生产环境中，建议使用 `callBackUrl` 参数在自建音色生成完成后接收自动通知，而不是轮询状态接口。\n:::\n\n## 使用生成的音色\n\n当任务成功后，查询接口或回调结果中会包含 `voiceId`。你可以在支持自建音色的 Suno 生成接口中使用该 ID。\n\n相关资源\n\n<CardGroup cols={2}>\n  <Card title=\"检查音色是否可用\" icon=\"lucide-badge-check\" href=\"/cn/suno-api/suno-voice-check-voice\"> 验证生成的音色是否可以使用 </Card>\n  <Card title=\"通用 API\" icon=\"lucide-cog\" href=\"/cn/suno-api/get-remaining-credits\"> 查看账户积分和使用情况 </Card>\n</CardGroup>\n",
+        "operationId": "suno-voice-generate",
+        "tags": [
+          "docs/zh-CN/Market/Suno API/voice",
+          "suno接口/voice"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "taskId": {
+                    "description": "任务task_id",
+                    "type": "string"
+                  },
+                  "verifyUrl": {
+                    "description": "用户录制服务端返回的验证短句后的音频URL；为获得更佳效果，建议采用演唱方式录制[必填]",
+                    "type": "string"
+                  },
+                  "voiceName": {
+                    "description": "音色名称",
+                    "type": "string"
+                  },
+                  "description": {
+                    "description": "音色描述",
+                    "type": "string"
+                  },
+                  "style": {
+                    "description": "音色风格",
+                    "type": "string"
+                  },
+                  "singerSkillLevel": {
+                    "type": "string",
+                    "description": "歌手技能等级。支持：beginner、intermediate、advanced、professional",
+                    "default": "beginner",
+                    "enum": [
+                      "beginner",
+                      "intermediate",
+                      "advanced",
+                      "professional"
+                    ],
+                    "x-apidog-enum": [
+                      {
+                        "value": "beginner",
+                        "name": "",
+                        "description": ""
+                      },
+                      {
+                        "value": "intermediate",
+                        "name": "",
+                        "description": ""
+                      },
+                      {
+                        "value": "advanced",
+                        "name": "",
+                        "description": ""
+                      },
+                      {
+                        "value": "professional",
+                        "name": "",
+                        "description": ""
+                      }
+                    ]
+                  },
+                  "callBackUrl": {
+                    "description": "用于接收自建音色生成结果的回调地址。任务成功时，回调中会包含生成的 `voiceId`；任务失败时会包含 `errorCode` 和 `errorMessage`。该地址必须可公网访问，并在 15 秒内返回 HTTP 200。回调数据格式请参考 [自建音色生成回调](https://docs.sunoapi.org/cn/suno-api/suno-voice-generate-callbacks)。",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "taskId",
+                  "verifyUrl"
+                ]
+              },
+              "example": {
+                "taskId": "voice_create_001",
+                "verifyUrl": "https://example.com/audio/verify_read.mp3",
+                "voiceName": "My Voice",
+                "description": "created from uploaded voice",
+                "style": "Pop, Female Vocal",
+                "singerSkillLevel": "beginner",
+                "callBackUrl": "https://example.com/callback/suno/voice_create"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "description": "任务id",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "taskId"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "success",
+                  "data": {
+                    "taskId": "xxx_task_id_xxx"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/voice/record-info": {
+      "get": {
+        "summary": "Suno Voice获取自建音色记录",
+        "deprecated": false,
+        "description": "查询 Suno Voice 自建音色生成结果。\n\n使用音色生成接口返回的 `taskId` 调用此接口。当任务成功后，响应中会包含 `voiceId`，该值可作为自建音色 ID 用于支持该能力的生成接口。\n\n## 状态处理\n\n根据 `status` 字段判断下一步操作：\n\n- `wait_processing`、`processing_validate` 或 `wait_validating`：任务仍在处理中\n- `success`：音色已准备完成，可以使用 `voiceId` 进行后续生成\n- `processing_validate_fail` 或 `fail`：任务失败，请查看 `errorMessage` 获取失败原因\n\n## 音色可用性\n\n获取 `voiceId` 后，可以使用音色可用性检查接口确认该音色是否可以使用：\n\n<Card\n  title=\"检查音色是否可用\"\n  icon=\"lucide-badge-check\"\n  href=\"/cn/suno-api/suno-voice-check-voice\"\n>\n  检查该任务生成的自建音色是否可用\n</Card>\n\n相关资源\n\n<CardGroup cols={2}>\n  <Card title=\"生成音色\" icon=\"lucide-mic\" href=\"/cn/suno-api/suno-voice-generate\"> 提交验证音频并创建自建音色 </Card>\n  <Card title=\"通用 API\" icon=\"lucide-cog\" href=\"/cn/suno-api/get-remaining-credits\"> 查看账户积分和使用情况 </Card>\n</CardGroup>\n",
+        "operationId": "suno-voice-record-info",
+        "tags": [
+          "docs/zh-CN/Market/Suno API/voice",
+          "suno接口/voice"
+        ],
+        "parameters": [
+          {
+            "name": "taskId",
+            "in": "query",
+            "description": "任务id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string",
+                          "description": "任务 ID。"
+                        },
+                        "voiceId": {
+                          "type": "string",
+                          "description": "生成的自建音色 ID。任务成功后可用于支持自建音色的生成接口。"
+                        },
+                        "status": {
+                          "type": "string",
+                          "description": "任务状态",
+                          "enum": [
+                            "wait_processing",
+                            "processing_validate",
+                            "processing_validate_fail",
+                            "wait_validating",
+                            "success",
+                            "fail"
+                          ]
+                        },
+                        "errorCode": {
+                          "type": "integer",
+                          "description": "错误码，任务失败时返回。"
+                        },
+                        "errorMessage": {
+                          "type": "string",
+                          "description": "错误信息，任务失败时返回。"
+                        }
+                      },
+                      "required": [
+                        "taskId",
+                        "voiceId",
+                        "status",
+                        "errorCode",
+                        "errorMessage"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "success",
+                  "data": {
+                    "taskId": "xxx_task_id_xxx",
+                    "voiceId": "xxx",
+                    "status": "wait_processing,processing_validate:等待验证码,processing_validate_fail:获取验证码失败,wait_validating:等待验证，success,fail",
+                    "errorCode": 500,
+                    "errorMessage": "xxxxx"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/voice/regenerate": {
+      "post": {
+        "summary": "Suno Voice 重新生成验证短句",
+        "deprecated": false,
+        "description": "为已有的 Suno Voice 任务重新生成验证短句。\n\n当之前的验证短句生成失败、已过期，或用户需要重新录制新的短句时，可以使用此接口。提交已有的 `taskId` 后，系统会启动新的验证短句生成任务，并返回用于轮询的新任务 ID。\n\n## 查询任务状态\n\n提交重新生成任务后，通过验证短句查询接口获取新的验证短句结果：\n\n<Card\n  title=\"获取验证短句\"\n  icon=\"lucide-search\"\n  href=\"/cn/suno-api/suno-voice-validate-info\"\n>\n  了解如何查询重新生成的验证短句任务状态\n</Card>\n\n## 继续流程\n\n新的验证短句生成完成后，请让用户录制该短句，并将验证音频提交到音色生成接口。为获得更佳的音色生成效果，建议采用演唱方式录制。\n\n<Card\n  title=\"生成音色\"\n  icon=\"lucide-mic\"\n  href=\"/cn/suno-api/suno-voice-generate\"\n>\n  使用新录制的验证音频继续自建音色生成流程\n</Card>\n\n相关资源\n\n<CardGroup cols={2}>\n  <Card title=\"生成验证短句\" icon=\"lucide-file-audio\" href=\"/cn/suno-api/suno-voice-validate\"> 从源音频开始验证短句流程 </Card>\n  <Card title=\"获取音色记录\" icon=\"lucide-list-checks\" href=\"/cn/suno-api/suno-voice-record-info\"> 查询最终的自建音色生成结果 </Card>\n</CardGroup>\n",
+        "operationId": "suno-voice-regenerate",
+        "tags": [
+          "docs/zh-CN/Market/Suno API/voice",
+          "suno接口/voice"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "taskId": {
+                    "description": "任务id",
+                    "type": "string"
+                  },
+                  "calBackUrl": {
+                    "type": "string",
+                    "description": "用于接收重新生成验证短句结果的回调地址。注意：该接口字段名为 `calBackUrl`。新的验证短句生成完成（`status: wait_validating`）或任务失败时，系统会向该地址发送 POST 请求。该地址必须可公网访问，并在 15 秒内返回 HTTP 200。回调数据格式请参考 [重新生成验证短句回调](https://docs.sunoapi.org/cn/suno-api/suno-voice-regenerate-callbacks)。"
+                  }
+                },
+                "required": [
+                  "taskId",
+                  "calBackUrl"
+                ]
+              },
+              "example": {
+                "taskId": "xxxxxxx",
+                "calBackUrl": "https://example.com/callback/suno/voice_regenerate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "taskId": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "taskId"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "success",
+                  "data": {
+                    "taskId": "xxx_task_id_xxx"
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/api/v1/voice/check-voice": {
+      "post": {
+        "summary": "Suno Voice检查是否可用接口",
+        "deprecated": false,
+        "description": "检查生成的 Suno 自建音色是否可用。\n\n音色生成完成后，可使用此接口验证该音色是否能够在支持 Suno 自建音色的生成接口中使用。提交相关任务 ID，并查看响应中的 `isAvailable` 值。\n\n## 使用场景\n\n当你准备发起依赖自建音色的音乐生成请求前，可以先调用此接口确认音色是否已经可用。\n\n<Card\n  title=\"获取音色记录\"\n  icon=\"lucide-search\"\n  href=\"/cn/suno-api/suno-voice-record-info\"\n>\n  建议先查询音色生成任务，获取最新任务状态和生成的音色信息\n</Card>\n\n相关资源\n\n<CardGroup cols={2}>\n  <Card title=\"生成音色\" icon=\"lucide-mic\" href=\"/cn/suno-api/suno-voice-generate\"> 根据验证音频创建自建音色 </Card>\n  <Card title=\"通用 API\" icon=\"lucide-cog\" href=\"/cn/suno-api/get-remaining-credits\"> 查看账户积分和使用情况 </Card>\n</CardGroup>\n",
+        "operationId": "suno-voice-check-voice",
+        "tags": [
+          "docs/zh-CN/Market/Suno API/voice",
+          "suno接口/voice"
+        ],
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "task_id": {
+                    "description": "需要检查的任务ID",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "task_id"
+                ]
+              },
+              "example": {
+                "task_id": ""
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "code": {
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "isAvailable": {
+                          "type": "boolean",
+                          "description": "音色是否可用。true 表示可用，false 表示暂不可用。"
+                        }
+                      },
+                      "required": [
+                        "isAvailable"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "code",
+                    "msg",
+                    "data"
+                  ]
+                },
+                "example": {
+                  "code": 200,
+                  "msg": "success",
+                  "data": {
+                    "isAvailable": true
+                  }
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {},
+    "responses": {},
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "API Key",
+        "description": "# API 认证说明\n\n所有接口都需要通过 Bearer Token 方式进行认证。\n\n## 获取 API Key\n\n1. 访问 [API Key 管理页面](https://sunoapi.org/api-key) 获取您的 API Key\n\n## 使用方式\n\n在请求头中添加：\n\n```\nAuthorization: Bearer YOUR_API_KEY\n```\n\n> **注意：**\n> - 请妥善保管您的 API Key，不要泄露给他人\n> - 如果怀疑 API Key 泄露，请立即在管理页面重置"
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.sunoapi.org",
+      "description": "API  服务器"
+    }
+  ],
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ]
+}

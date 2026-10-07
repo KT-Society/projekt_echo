@@ -1,0 +1,1 @@
+# Endpoint: /{id}/metadata\n\n## Method: GET\n\n**Summary:** Get file metadata\n\n**Description:** Return file metadata (id, content type, size, upload timestamp) as JSON without downloading the file body.\n\n### Parameters\n\n- **id** (path): N/A\n\n## Method: SERVERS\n\n**Summary:** N/A\n\n**Description:** N/A\n\n

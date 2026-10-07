@@ -1,0 +1,1 @@
+# Endpoint: /account/profile\n\n## Method: GET\n\n**Summary:** Get Profile\n\n**Description:** Returns your account profile. GitHub username, profile image, and community model access are always returned. Name and email are returned only when the API key has `account:profile`.\n\n

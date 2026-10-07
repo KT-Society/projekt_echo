@@ -1,0 +1,1 @@
+# Endpoint: /account/quests\n\n## Method: GET\n\n**Summary:** Get Quest Status\n\n**Description:** Returns the quest catalog with the authenticated account's read-only status. Globally completed quests and quests earned by the account are both returned as `completed`. API keys require the read-only `account:usage` permission. Claiming rewards remains dashboard-only.\n\n

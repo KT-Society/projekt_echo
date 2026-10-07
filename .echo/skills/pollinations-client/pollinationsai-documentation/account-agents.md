@@ -1,0 +1,1 @@
+# Endpoint: /account/agents\n\n## Method: GET\n\n**Summary:** List Agents\n\n**Description:** List prompt agents owned by the authenticated account. API keys require `account:keys`.\n\n## Method: POST\n\n**Summary:** Create Agent\n\n**Description:** Create and list a prompt agent in one operation. API keys require `account:keys`.\n\n

@@ -1,0 +1,1 @@
+# Endpoint: /account/my-models/{id}\n\n## Method: DELETE\n\n**Summary:** Delete My Model\n\n**Description:** Delete a community model owned by the authenticated account. API keys require `account:keys`.\n\n### Parameters\n\n- **id** (path): N/A\n\n
