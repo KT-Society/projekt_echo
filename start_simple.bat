@@ -1,4 +1,5 @@
 @echo off
+set ECHO_OS=windows
 title Echo's Hacking Game
 color 0A
 

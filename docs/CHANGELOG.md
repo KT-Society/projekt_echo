@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [2.0.0] - 2026-10-20
 
 ### Added
+- **8-Bit Game Boy Audio Engine (`retro_audio.py`):** Pure Python standard-library synthesizer simulating the classic Sharp LR35902 (DMG-01) sound chip. Generates pulse/square waves with variable duty cycles (12.5%, 25%, 50%), frequency pitch sweeps, 4-bit volume envelope quantization, and LFSR pseudo-random noise. Pre-cached in memory for instant, asynchronous cross-platform playback (via `winsound` on Windows, `afplay` on macOS, `aplay`/`paplay` on Linux).
+- **Dynamic Terminal Sound Effects:** Authentic Game Boy power-on boot chime, menu/cursor blips, secret-discovered coin chimes, rapid cybernetic exploit arpeggios, glitch buzzers on command failure, and stage victory fanfares on level completion.
+- **In-Browser Web Audio Synthesizer:** Embedded zero-asset 8-bit sound generator in all web templates playing square-wave blips on button clicks and jingles on exploit successes.
+- **Audio Controls & Persistence:** Toggleable in Settings (`8-Bit Game Boy Sound-FX: [ON 🔊 / OFF 🔇]`) with persistent storage in `player_progress.json`.
+- **Intelligent Shell & OS Environment Detection:** Automatic detection of Bash/Linux environments (via `SHELL`, `MSYSTEM`, `OSTYPE`, `WSL`, `start.sh`) ensuring Linux commands (`curl`, `grep`, `nmap`, `ss`) are presented when running in Bash, rather than hardcoding Windows commands.
+- **Interactive OS Switcher in Settings:** Allows players to freely toggle between Linux/Bash, macOS/Zsh, and Windows/PowerShell command modes with persistence.
+- **Micro-Paced Output Flow:** Added smooth human-readable micro-pacing when Retro-Effects are OFF (`simulate_old_terminal`, `typewriter_effect`), completely eliminating disorienting instant screen-scroll floods.
+- **Streamlined Command Prompts:** Moved extensive tutorial blocks outside the input loops to prevent 25-line walls of text repeating on every keystroke.
 - **CTF Flag Infrastructure:** Standardized `ECHO{...}` flag schema across all 5 levels for clear exploit verification.
 - **Dynamic Session Synchronization:** Client-Server Handshake (`/api/session/targets`) guaranteeing 100% token consistency between target daemon and terminal game client.
 - **Glassmorphism 3.0 Web UI:** Full visual overhaul for all 6 target endpoints (`index.html`, `login.html`, `dashboard.html`, `documents.html`, `comments.html`, `admin.html`) featuring dark cyberpunk aesthetics (`backdrop-filter: blur(14px)`, neon cyan/magenta accents, Outfit & JetBrains Mono typography).

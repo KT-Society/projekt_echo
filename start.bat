@@ -1,4 +1,5 @@
 @echo off
+set ECHO_OS=windows
 title Echo's Hacking Game - Der Erbschafts-Coup
 color 0A
 

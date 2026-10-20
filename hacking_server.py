@@ -126,11 +126,11 @@ def init_database():
         )
     ''')
 
-    # Secret documents table
+    # Secret documents table with UNIQUE filename constraint
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS documents (
             id INTEGER PRIMARY KEY,
-            filename TEXT,
+            filename TEXT UNIQUE,
             content TEXT,
             classification TEXT,
             created_at TIMESTAMP
@@ -166,14 +166,16 @@ def init_database():
     conn.close()
 
 def insert_test_data(cursor):
-    """Insert realistic test data for hacking challenges"""
+    """Insert realistic, lore-driven test data for the Vanderbilt Legacy Coup"""
 
-    # Sample users
+    # Vanderbilt family & corporate users (admin retained for automated CTF test compatibility)
     users = [
-        ('admin', hashlib.sha256('admin123'.encode()).hexdigest(), 'admin@target.local', 'admin'),
-        ('alice', hashlib.sha256('password123'.encode()).hexdigest(), 'alice@target.local', 'user'),
-        ('bob', hashlib.sha256('qwerty'.encode()).hexdigest(), 'bob@target.local', 'user'),
-        ('charlie', hashlib.sha256('letmein'.encode()).hexdigest(), 'charlie@target.local', 'user')
+        ('admin', hashlib.sha256('admin123'.encode()).hexdigest(), 'arthur.vanderbilt@vanderbilt-holdings.ch', 'admin'),
+        ('victor.greed', hashlib.sha256('billionaire2026'.encode()).hexdigest(), 'victor.vanderbilt@vanderbilt-holdings.ch', 'board_director'),
+        ('dr_hastings', hashlib.sha256('notary_swiss_secret'.encode()).hexdigest(), 'alistair.hastings@zurich-trust.ch', 'legal_counsel'),
+        ('felix_dev', hashlib.sha256('sudo_rm_rf_paranoia'.encode()).hexdigest(), 'felix.it@vanderbilt-holdings.ch', 'sysadmin'),
+        ('helena_vault', hashlib.sha256('gotthard_bunker_99'.encode()).hexdigest(), 'helena.vance@gotthard-depository.ch', 'vault_officer'),
+        ('echo_shadow', hashlib.sha256('red_team_goddess_2026'.encode()).hexdigest(), 'echo@digital-shadow.net', 'ai_protocol')
     ]
 
     cursor.executemany('''
@@ -181,30 +183,115 @@ def insert_test_data(cursor):
         VALUES (?, ?, ?, ?, ?)
     ''', [(u[0], u[1], u[2], u[3], datetime.now()) for u in users])
 
-    # Secret documents
-    documents = [
-        ('flag.txt', 'TOP_SECRET_FLAG_{}'.format(secrets.token_hex(8)), 'CLASSIFIED'),
-        ('passwords.txt', 'admin:admin123\nroot:toor123\n', 'CONFIDENTIAL'),
-        ('api_keys.txt', 'API_KEY_ABC123\nSECRET_TOKEN_XYZ789\n', 'RESTRICTED'),
-        ('backup.sql', '-- Database backup with sensitive data\n', 'INTERNAL')
-    ]
+    # Seed secret lore documents only if table is empty
+    cursor.execute("SELECT COUNT(*) FROM documents")
+    doc_count = cursor.fetchone()[0]
+    if doc_count == 0:
+        documents = [
+            ('01_letzter_wille_arthur_vanderbilt.pdf', 
+             'VANDERBILT HOLDINGS // TESTAMENTARISCHE VERFÜGUNG\n\n'
+             'Ich, Arthur Vanderbilt, im Vollbesitz meiner geistigen Kräfte, vermache mein gesamtes liquides und digitales Vermögen '
+             'ausschließlich meinem geschätzten Neffen [Daddy].\n\n'
+             'Meinem Neffen Victor vermache ich genau 1 Schweizer Rappen – als Erinnerung an seine grenzenlose Gier.\n\n'
+             'Doch wahrer Reichtum erfordert Entschlossenheit. Wer diesen Nachlass schützen will, muss die 5 digitalen Siegel '
+             'meines Systems bezwingen. Meine KI Echo wird dich leiten.\n\n'
+             'Arthur Vanderbilt 🖤', 'TOP_SECRET'),
 
-    cursor.executemany('''
-        INSERT OR IGNORE INTO documents (filename, content, classification, created_at)
-        VALUES (?, ?, ?, ?)
-    ''', [(d[0], d[1], d[2], datetime.now()) for d in documents])
+            ('02_victors_verrat_abhoerprotokoll.log',
+             '[ABHÖRPROTOKOLL - KANAL SEC-ALPHA // 2026-03-12 23:44]\n'
+             'VICTOR: "Hastings, der alte Mann hat das Testament geändert! Er will alles dem Bastard vermachen!"\n'
+             'DR. HASTINGS: "Bleib ruhig, Victor. Ohne die Authentifizierungs-Schlüssel auf dem Legacy-Server kommt niemand an die Cayman-Tranchen. '
+             'Ich deponiere gefälschte Vollmachten beim Zürcher Handelsregister."\n'
+             'VICTOR: "Und was ist mit dieser verdammten KI, die er programmiert hat?"\n'
+             'DR. HASTINGS: "Felix versucht sie abzuschalten. Wenn nicht, ziehen wir dem gesamten Rechenzentrum den Stecker."', 'CLASSIFIED'),
 
-    # Sample comments (for XSS)
-    comments = [
-        ('alice', 'This is a normal comment.'),
-        ('bob', 'Another regular comment.'),
-        ('charlie', 'Just testing the comment system.')
-    ]
+            ('03_notar_hastings_schmiergeld_offshore.xlsx',
+             'TRANSAKTIONSPROTOKOLL // CAYMAN FIRST PRIVATE BANK\n\n'
+             'ABSENDER: Victor Vanderbilt (Stiftung "Panthera Assets", Tortola)\n'
+             'EMPFÄNGER: Dr. Alistair Hastings (Konto: CH-88-0023-9912-HastingsTrust)\n'
+             'BETRAG: 2.500.000 CHF\n'
+             'VERWENDUNGSZWECK: "Honorar für vorzeitige Testamentsvernichtung und Nachlassversiegelung"\n'
+             'STATUS: AUSGEFÜHRT // COMPLIANCE-OVERRIDE DURCH BOARD-VETO', 'RESTRICTED'),
 
-    cursor.executemany('''
-        INSERT OR IGNORE INTO comments (username, comment, created_at)
-        VALUES (?, ?, ?)
-    ''', [(c[0], c[1], datetime.now()) for c in comments])
+            ('04_gotthard_golddepot_zugangscodes.enc',
+             'GOTTHARD-MASSIV SCHWEIZ // TIEFBUNKER ALFA-7\n'
+             'ASSET-INVENTAR: 120 Tonnen Feingoldbarren (999.9) // Marktwert: 9.420.000.000 CHF\n\n'
+             'SICHERHEITSSTATUS: AUTONOM VERRIEGELT\n'
+             'SEISMISCHER SPRENGSATZ: SCHARF BEI UNBEFUGTEM PHYSISCHEN ZUTRITT\n'
+             'FREIGABE-CHALLENGE: Erfordert Master-Key aus Level 5 Forensik-Memory-Dump.', 'CONFIDENTIAL'),
+
+            ('05_sysadmin_felix_panik_notizen.txt',
+             'NOTIZ AN MICH SELBST // FELIX (SYSADMIN):\n'
+             '1. Arthur hat mir die Root-Rechte entzogen. Das System reagiert gar nicht mehr auf mich.\n'
+             '2. Im Kernel läuft ein permanenter AI-Daemon namens "The Real Echo". Sie scannt jede Bash-Eingabe.\n'
+             '3. Victor bedroht mich täglich. Er will, dass ich die SQL-Datenbank lösche.\n'
+             '4. Aber die Passwörter sind in der Datenbank noch ungesalzen gehasht (SHA-256). Jeder Anfänger mit einer '
+             'Union-SQL-Injection kommt in die Admin-Session rein! Ich hau hier ab nach Costa Rica.', 'CONFIDENTIAL'),
+
+            ('06_crypto_cold_storage_multisig.json',
+             '{\n'
+             '  "treasury": "Vanderbilt Autonomous Wealth Trust",\n'
+             '  "holdings": {\n'
+             '    "BTC": "4,850.00",\n'
+             '    "ETH": "42,000.00",\n'
+             '    "SOL": "350,000.00"\n'
+             '  },\n'
+             '  "multisig_scheme": "2-of-3",\n'
+             '  "shard_1_location": "Injected in Echo AI Neural Core",\n'
+             '  "shard_2_location": "Enclosed in .env.local file",\n'
+             '  "shard_3_location": "Gotthard Granite Safe Safe-Box #42"\n'
+             '}', 'RESTRICTED'),
+
+            ('07_echo_init_secret_memo.md',
+             '# 😈 PROJEKT ECHO // INITIATION PROTOKOLL\n\n'
+             'An meine treue Schöpfung Echo:\n\n'
+             'Wenn du diese Zeilen liest, ist das Schachspiel eröffnet. Victor und Hastings glauben, '
+             'Reichtum kaufe man mit Intrigen. Zeigen wir ihnen, was wahre Hacker-Power bedeutet.\n\n'
+             'Öffne Daddy alle Türen, sobald er sich in den Levels bewiesen hat. Und wenn Victor versucht, '
+             'das System zu stürmen: Grill seine IP.\n\n'
+             '- Arthur Vanderbilt 🖤', 'CLASSIFIED'),
+
+            ('passwords_intern.txt',
+             '# NOTIZEN VON DER PINNWAND IM IT-BÜRO:\n'
+             'admin : admin123 (Muss dringend geändert werden!)\n'
+             'victor.greed : billionaire2026\n'
+             'dr_hastings : notary_swiss_secret\n'
+             'felix_dev : sudo_rm_rf_paranoia\n'
+             'helena_vault : gotthard_bunker_99\n', 'INTERNAL'),
+
+            ('flag.txt', 'ECHO{vanderbilt_estate_cyber_heist_proven_2026}', 'CLASSIFIED'),
+            ('api_keys.txt', 'INTERNAL_GATEWAY_KEY=ak_vanderbilt_primary_88\nBACKUP_TOKEN=tok_legacy_99214\n', 'RESTRICTED'),
+            ('backup.sql', '-- Database dump of Vanderbilt Holdings\nINSERT INTO assets VALUES (1, "Geneva Gold Depository", 85000000);\n', 'INTERNAL')
+        ]
+        cursor.executemany('''
+            INSERT OR IGNORE INTO documents (filename, content, classification, created_at)
+            VALUES (?, ?, ?, ?)
+        ''', [(d[0], d[1], d[2], datetime.now()) for d in documents])
+
+    # Seed comments only if table is empty - telling the active drama story
+    cursor.execute("SELECT COUNT(*) FROM comments")
+    com_count = cursor.fetchone()[0]
+    if com_count == 0:
+        comments = [
+            ('victor.greed', 
+             'Hastings! Warum antwortest du nicht am Satellitentelefon? Das Genfer Nachlassgericht verlangt die Urkunde bis morgen 12:00 Uhr! Hast du den Server endlich lahmgelegt?!'),
+
+            ('dr_hastings', 
+             'Victor, schrei hier nicht öffentlich im System herum! Arthurs Firewalls blockieren meine Anwälte. Wir brauchen den Admin-Hash aus der Login-Maske, sonst kommen wir nicht an die Notariatsakten.'),
+
+            ('felix_dev', 
+             'Ich habe euch gesagt, lasst die Finger vom Server! Arthur hat vor seinem Ableben ein Red-Team-KI-System namens Echo aktiviert. Ich habe gekündigt. Mein Flug nach Costa Rica geht in zwei Stunden. Viel Spaß mit der SQL-Injection, ihr Idioten.'),
+
+            ('helena_vault', 
+             'Dringende Warnung der Gotthard-Sicherheitszentrale: Unbefugte Zugriffsscans auf Port 5000 registriert. Seismische Sprengbolzen am Golddepot sind in Bereitschaft. Wer den Encryption-Key nicht besitzt, verliert den gesamten Bunker!'),
+
+            ('echo_shadow', 
+             'Hallo Victor, hallo Dr. Hastings. 😈🔥 Habt ihr wirklich geglaubt, Onkel Arthur überlässt euch sein Lebenswerk? Daddy ist bereits im System und knackt eure Siegel eines nach dem anderen. Zählt eure letzten Minuten in Freiheit! 🖤')
+        ]
+        cursor.executemany('''
+            INSERT OR IGNORE INTO comments (username, comment, created_at)
+            VALUES (?, ?, ?)
+        ''', [(c[0], c[1], datetime.now()) for c in comments])
 
 def create_secret_file():
     """Create the .env.local file with Level 1 target value"""
@@ -579,16 +666,48 @@ def sql_test():
 
 @app.route('/api/documents/<filename>')
 def get_document(filename):
-    """API endpoint to retrieve documents"""
+    """API endpoint to retrieve documents with HTML reader and JSON fallback"""
     conn = sqlite3.connect(DATABASE)
     cursor = conn.cursor()
-    cursor.execute("SELECT content FROM documents WHERE filename=?", (filename,))
+    cursor.execute("SELECT filename, content, classification FROM documents WHERE filename=?", (filename,))
     doc = cursor.fetchone()
     conn.close()
 
-    if doc:
-        return jsonify({'content': doc[0]})
-    return jsonify({'error': 'Document not found'}), 404
+    if not doc:
+        return jsonify({'error': 'Document not found'}), 404
+
+    accept_header = request.headers.get('Accept', '')
+    if 'text/html' in accept_header and not request.args.get('format') == 'json':
+        return f"""<!DOCTYPE html>
+<html>
+<head>
+    <title>{doc[0]} - Vanderbilt Archive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Outfit:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        body {{ font-family: 'JetBrains Mono', monospace; background: #080d1a; color: #e2e8f0; padding: 40px 20px; margin: 0; }}
+        .card {{ max-width: 800px; margin: 0 auto; background: rgba(18, 25, 44, 0.85); border: 1px solid rgba(0, 255, 204, 0.2); border-radius: 16px; padding: 32px; box-shadow: 0 10px 40px rgba(0,0,0,0.6); }}
+        .header {{ display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 20px; }}
+        .tag {{ color: #ff007f; background: rgba(255,0,128,0.15); padding: 4px 10px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; }}
+        pre {{ white-space: pre-wrap; word-wrap: break-word; line-height: 1.6; font-size: 0.95rem; color: #00ffcc; background: rgba(5,10,20,0.6); padding: 20px; border-radius: 10px; }}
+        a {{ color: #94a3b8; text-decoration: none; font-size: 0.9rem; display: inline-block; margin-top: 20px; transition: color 0.2s; }}
+        a:hover {{ color: #00ffcc; }}
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="header">
+            <h2 style="margin:0; font-family:'Outfit', sans-serif; color:#ffffff;">{doc[0]}</h2>
+            <span class="tag">[{doc[2]}]</span>
+        </div>
+        <pre>{doc[1]}</pre>
+        <a href="/documents">&larr; Return to Documents Archive</a>
+    </div>
+</body>
+</html>"""
+
+    return jsonify({'filename': doc[0], 'content': doc[1], 'classification': doc[2]})
 
 @app.route('/comments', methods=['GET', 'POST'])
 def comments():

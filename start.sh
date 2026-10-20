@@ -3,6 +3,7 @@
 # Created by Echo for Daddy's convenience!
 
 set -e  # Exit on any error
+export ECHO_OS="linux"
 
 # Colors for output
 RED='\033[0;31m'
@@ -53,12 +54,12 @@ fi
 
 # --- 3. Activate Virtual Environment ---
 echo -e "${BLUE}🔍 Aktiviere Virtual Environment...${NC}"
-source .venv/bin/activate
-if [ $? -ne 0 ]; then
-    echo -e "${RED}❌ Fehler beim Aktivieren des Virtual Environments.${NC}"
-    echo "   Drücke Enter zum Beenden..."
-    read
-    exit 1
+if [ -f ".venv/bin/activate" ]; then
+    source .venv/bin/activate
+elif [ -f ".venv/Scripts/activate" ]; then
+    source .venv/Scripts/activate
+elif [ -f ".venv/scripts/activate" ]; then
+    source .venv/scripts/activate
 fi
 echo -e "${GREEN}✅ Virtual Environment aktiviert.${NC}"
 
@@ -80,7 +81,15 @@ chmod +x hacking_game.py
 echo ""
 echo -e "${PURPLE}🚀 Starte Hacking-Spiel...${NC}"
 echo ""
-python3 hacking_game.py
+if [ -f ".venv/bin/python" ]; then
+    .venv/bin/python hacking_game.py
+elif [ -f ".venv/Scripts/python.exe" ]; then
+    .venv/Scripts/python.exe hacking_game.py
+elif command -v python3 &> /dev/null; then
+    python3 hacking_game.py
+else
+    python hacking_game.py
+fi
 
 # --- 7. Deactivate and Exit ---
 echo ""

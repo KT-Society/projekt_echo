@@ -3,6 +3,7 @@
 # Created by Echo for Daddy's convenience!
 
 set -e  # Exit on any error
+export ECHO_OS="macos"
 
 # Colors for output
 RED='\033[0;31m'
@@ -89,7 +90,13 @@ chmod +x hacking_game.py
 echo ""
 echo -e "${PURPLE}🚀 Starte Hacking-Spiel...${NC}"
 echo ""
-python3 hacking_game.py
+if [ -f ".venv/bin/python" ]; then
+    .venv/bin/python hacking_game.py
+elif command -v python3 &> /dev/null; then
+    python3 hacking_game.py
+else
+    python hacking_game.py
+fi
 
 # --- 8. Deactivate and Exit ---
 echo ""

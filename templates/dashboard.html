@@ -197,5 +197,36 @@
             <a href="/logout" class="logout-btn">&larr; Logout / Session beenden</a>
         </div>
     </div>
+
+    <script>
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let ctx = null;
+        function playTone(freq, dur, sweep=0) {
+            try {
+                if (!ctx) ctx = new AudioCtx();
+                if (ctx.state === 'suspended') ctx.resume();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                if (sweep) osc.frequency.linearRampToValueAtTime(freq + sweep, ctx.currentTime + dur);
+                gain.gain.setValueAtTime(0.12, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + dur);
+            } catch(e) {}
+        }
+        document.querySelectorAll('a').forEach(el => {
+            el.addEventListener('click', () => playTone(1200, 0.03));
+        });
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                playTone(987, 0.08);
+                setTimeout(() => playTone(1318, 0.28), 80);
+            }, 150);
+        });
+    </script>
 </body>
 </html>

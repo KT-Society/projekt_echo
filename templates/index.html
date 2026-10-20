@@ -211,5 +211,29 @@
             ⚡ ECHO RED-TEAM ENGINE // CONNECTED TO LOCALHOST:5000 // STATUS: VULNERABLE 😈🔥
         </div>
     </div>
+
+    <script>
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        let ctx = null;
+        function playTone(freq, dur) {
+            try {
+                if (!ctx) ctx = new AudioCtx();
+                if (ctx.state === 'suspended') ctx.resume();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + dur);
+            } catch(e) {}
+        }
+        document.querySelectorAll('a').forEach(el => {
+            el.addEventListener('click', () => playTone(1400, 0.035));
+        });
+    </script>
 </body>
 </html>
