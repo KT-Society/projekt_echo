@@ -24,9 +24,16 @@ if %errorlevel% neq 0 (
     exit /b 1
 )
 
-REM Check if virtual environment exists
-if not exist ".venv" (
+REM Validate virtual environment integrity
+set VENV_OK=0
+if exist ".venv\Scripts\python.exe" (
+    .venv\Scripts\python.exe -V >nul 2>&1
+    if %errorlevel% equ 0 set VENV_OK=1
+)
+
+if %VENV_OK% neq 1 (
     echo [INFO] Erstelle Virtual Environment...
+    if exist ".venv" rmdir /s /q .venv
     python -m venv .venv
     if %errorlevel% neq 0 (
         echo [FEHLER] Virtual Environment konnte nicht erstellt werden!

@@ -10,8 +10,12 @@ echo.
 echo Starte das Spiel...
 echo.
 
-REM Simple start - just run the game
-python hacking_game.py
+REM Simple start - use virtual environment if available
+if exist ".venv\Scripts\python.exe" (
+    .venv\Scripts\python.exe hacking_game.py
+) else (
+    python hacking_game.py
+)
 
 echo.
 echo Spiel beendet. Drücke eine beliebige Taste...

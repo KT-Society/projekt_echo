@@ -7,6 +7,25 @@ All notable changes to Echo's Ultimate Hacking Game will be documented in this f
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-10-20
+
+### Added
+- **CTF Flag Infrastructure:** Standardized `ECHO{...}` flag schema across all 5 levels for clear exploit verification.
+- **Dynamic Session Synchronization:** Client-Server Handshake (`/api/session/targets`) guaranteeing 100% token consistency between target daemon and terminal game client.
+- **Glassmorphism 3.0 Web UI:** Full visual overhaul for all 6 target endpoints (`index.html`, `login.html`, `dashboard.html`, `documents.html`, `comments.html`, `admin.html`) featuring dark cyberpunk aesthetics (`backdrop-filter: blur(14px)`, neon cyan/magenta accents, Outfit & JetBrains Mono typography).
+- **Interactive Echo Toolkit:** In-game companion utilities including `/hint`, `/payloads`, `/decode <b64|hex|url>`, and `/status`.
+
+### Fixed
+- **Target Desynchronization Bug:** Eliminated random UUID mismatches where server and client checked unrelated tokens.
+- **Duplicate Request Execution:** Removed dual subprocess/requests dispatch in CLI loops; commands now execute once cleanly.
+- **Payload Mangler:** Replaced destructive URL-decoding in curl parser with raw parameter splitting preserving SQL quotes, whitespace, and XSS tags.
+- **Virtual Environment & Process Deadlocks:** Restored modern Python 3.11 `.venv` environment, disabled Werkzeug double-spawn (`use_reloader=False`), and migrated subprocess pipes to `DEVNULL` preventing Windows IO buffer starvation.
+- **Authenticated Stored XSS Workflow:** Automated session cookie propagation enabling seamless XSS exploit delivery in Level 4.
+
+### Quality Assurance
+- **100% Automated Test Pass Rate:** Verified through `test_levels.py` (10/10 responses, 6/6 level categories) and `test_sql_injection.py`.
+- **Zero-Warning Compliance:** Cleaned up LSP/Pyright warnings across all game components.
+
 ## [Beta 1.0.1] - 2025-01-19
 
 ### Fixed

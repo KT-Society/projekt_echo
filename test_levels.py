@@ -15,9 +15,14 @@ import hashlib
 
 # Fix Unicode encoding for Windows
 if sys.platform.startswith('win'):
-    import codecs
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+    try:
+        import codecs
+        if hasattr(sys.stdout, 'detach'):
+            sys.stdout = codecs.getwriter('utf-8')(getattr(sys.stdout, 'detach')())
+        if hasattr(sys.stderr, 'detach'):
+            sys.stderr = codecs.getwriter('utf-8')(getattr(sys.stderr, 'detach')())
+    except Exception:
+        pass
 
 def test_server():
     """Teste ob der Server läuft UND echte Daten zurückgibt"""
@@ -734,20 +739,20 @@ def main():
             venv_python = os.path.join(os.getcwd(), ".venv", "Scripts", "python.exe")
             if os.path.exists(venv_python):
                 subprocess.Popen([venv_python, "hacking_server.py"], 
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                 creationflags=subprocess.CREATE_NO_WINDOW)
             else:
                 subprocess.Popen([sys.executable, "hacking_server.py"], 
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                                 creationflags=subprocess.CREATE_NO_WINDOW)
         else:
             venv_python = os.path.join(os.getcwd(), ".venv", "bin", "python")
             if os.path.exists(venv_python):
                 subprocess.Popen([venv_python, "hacking_server.py"], 
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             else:
                 subprocess.Popen([sys.executable, "hacking_server.py"], 
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         
         # Länger warten für Server-Start
         print("⏳ Warte auf Server-Start...")
@@ -796,7 +801,7 @@ def main():
     else:
         print("⚠️  EINIGE TESTS HABEN PROBLEME!")
     
-    return passed == 5
+    return passed == 6
 
 if __name__ == "__main__":
     main()

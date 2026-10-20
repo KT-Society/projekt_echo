@@ -1,35 +1,199 @@
 <!DOCTYPE html>
-<html>
+<html lang="de">
 <head>
-    <title>Login - Hacking Target</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Hacking Target | Vanderbilt Terminal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .login-form { max-width: 400px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
-        .form-group { margin: 10px 0; }
-        label { display: block; margin-bottom: 5px; }
-        input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 3px; }
-        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 3px; cursor: pointer; }
-        .error { color: red; margin: 10px 0; }
+        :root {
+            --bg-base: hsl(225, 40%, 7%);
+            --glass-bg: rgba(18, 25, 44, 0.72);
+            --glass-border: rgba(0, 255, 204, 0.2);
+            --cyan-glow: hsl(168, 100%, 50%);
+            --magenta-glow: hsl(320, 100%, 60%);
+            --crimson-glow: hsl(350, 100%, 60%);
+            --text-main: hsl(210, 40%, 98%);
+            --text-muted: hsl(215, 20%, 65%);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: radial-gradient(circle at 50% 30%, hsl(260, 45%, 14%) 0%, var(--bg-base) 75%);
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 36px 32px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(0, 255, 204, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+        .login-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, var(--cyan-glow), var(--magenta-glow));
+        }
+        .terminal-header {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--cyan-glow);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff 40%, var(--cyan-glow) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+        .error-banner {
+            background: rgba(220, 53, 69, 0.15);
+            border: 1px solid rgba(220, 53, 69, 0.4);
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 20px;
+            color: var(--crimson-glow);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            background: rgba(10, 15, 28, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+            padding: 12px 16px;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: var(--cyan-glow);
+            box-shadow: 0 0 12px rgba(0, 255, 204, 0.25);
+            background: rgba(10, 15, 28, 0.9);
+        }
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, hsl(168, 100%, 45%), hsl(180, 100%, 40%));
+            color: #051017;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 13px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3);
+            margin-top: 6px;
+        }
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 255, 204, 0.5);
+            background: linear-gradient(135deg, hsl(168, 100%, 50%), hsl(180, 100%, 45%));
+        }
+        .hint-box {
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+        .hint-box code {
+            color: var(--cyan-glow);
+            background: rgba(0, 255, 204, 0.08);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--cyan-glow); }
     </style>
 </head>
 <body>
-    <div class="login-form">
+    <div class="login-card">
+        <div class="terminal-header">// AUTHENTICATION GATEWAY v2.4</div>
         <h2>Login to Target System</h2>
+        <p class="subtitle">Vanderbilt Legacy Archives &mdash; Access Restricted</p>
+
         {% if error %}
-        <div class="error">{{ error }}</div>
+        <div class="error-banner">
+            <span>[!]</span> {{ error }}
+        </div>
         {% endif %}
+
         <form method="POST">
             <div class="form-group">
-                <label>Username:</label>
-                <input type="text" name="username" required>
+                <label for="username">Username</label>
+                <div class="input-wrapper">
+                    <input type="text" id="username" name="username" placeholder="admin / operator" required autofocus>
+                </div>
             </div>
             <div class="form-group">
-                <label>Password:</label>
-                <input type="password" name="password" required>
+                <label for="password">Password</label>
+                <div class="input-wrapper">
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                </div>
             </div>
-            <button type="submit">Login</button>
+            <input type="submit" class="submit-btn" value="Login">
         </form>
-        <p><small>Hint: Try SQL injection...</small></p>
+
+        <div class="hint-box">
+            💡 Hint: Try SQL injection... e.g. <code>admin' OR '1'='1' --</code>
+        </div>
+        <a href="/" class="back-link">&larr; Return to Vulnerability Overview</a>
     </div>
 </body>
 </html>

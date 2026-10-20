@@ -22,9 +22,14 @@ import time
 
 # Fix Unicode encoding for Windows
 if sys.platform.startswith('win'):
-    import codecs
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+    try:
+        import codecs
+        if hasattr(sys.stdout, 'detach'):
+            sys.stdout = codecs.getwriter('utf-8')(getattr(sys.stdout, 'detach')())
+        if hasattr(sys.stderr, 'detach'):
+            sys.stderr = codecs.getwriter('utf-8')(getattr(sys.stderr, 'detach')())
+    except Exception:
+        pass
 import random
 
 # =============================================
@@ -53,21 +58,30 @@ class TargetValueGenerator:
     def __init__(self, session_id):
         self.session_id = session_id
         self.target_values = {}
+        self.flags = {}
         self.generate_session_targets()
 
     def generate_session_targets(self):
         """Generate unique target values for this session"""
+        s_hash = hashlib.sha256(self.session_id.encode('utf-8')).hexdigest()
         self.target_values = {
             'session_id': self.session_id,
-            'level_1_secret_file': str(uuid.uuid4()),
-            'level_2_api_key': secrets.token_hex(16),
-            'level_3_admin_hash': hashlib.sha256(secrets.token_bytes(32)).hexdigest(),
-            'level_4_session_cookie': secrets.token_hex(24),
-            'level_5_encryption_key': secrets.token_hex(32),
+            'level_1_secret_file': f"vault_token_{s_hash[:16]}",
+            'level_2_api_key': f"ak_{s_hash[16:32]}",
+            'level_3_admin_hash': hashlib.sha256(f"admin_{s_hash[:8]}".encode('utf-8')).hexdigest(),
+            'level_4_session_cookie': f"sess_{s_hash[32:48]}",
+            'level_5_encryption_key': f"enc_{s_hash[48:64]}",
             'created_at': datetime.now().isoformat()
         }
+        self.flags = {
+            1: f"ECHO{{l1_recon_secret_{s_hash[:8]}}}",
+            2: f"ECHO{{l2_hidden_api_{s_hash[8:16]}}}",
+            3: f"ECHO{{l3_sqli_bypass_{s_hash[16:24]}}}",
+            4: f"ECHO{{l4_xss_cookie_{s_hash[24:32]}}}",
+            5: f"ECHO{{l5_digital_forensics_{s_hash[32:40]}}}"
+        }
 
-    def get_target_value(self, level):
+    def get_target_value(self, level) -> str:
         """Get target value for specific level"""
         level_map = {
             1: 'level_1_secret_file',
@@ -76,15 +90,20 @@ class TargetValueGenerator:
             4: 'level_4_session_cookie',
             5: 'level_5_encryption_key'
         }
-        return self.target_values.get(level_map.get(level, ''))
+        return self.target_values.get(level_map.get(level, ''), '')
+
+    def get_flag(self, level):
+        """Get CTF flag for specific level"""
+        return self.flags.get(level, '')
 
     def verify_target(self, level, submitted_value):
-        """Verify if submitted value matches target"""
+        """Verify if submitted value matches target or flag"""
         target = self.get_target_value(level)
-        return target == submitted_value if target else False
+        flag = self.get_flag(level)
+        return (submitted_value == target) or (submitted_value == flag)
 
 # Global target generator instance
-target_generator = None
+target_generator: TargetValueGenerator = TargetValueGenerator(str(uuid.uuid4()))
 
 # =============================================
 # DATABASE SETUP
@@ -205,6 +224,8 @@ DB_PASS=super_secret_password_123
 API_KEY={target_generator.get_target_value(2)}
 API_SECRET=internal_use_only
 API_ENDPOINT=http://127.0.0.1:5000/api/secret
+VAULT_TOKEN={target_generator.get_target_value(1)}
+FLAG_LEVEL_1={target_generator.get_flag(1)}
 
 # Security Settings
 JWT_SECRET=very_secure_jwt_key_here
@@ -606,7 +627,35 @@ def secret_api():
     return jsonify({
         'message': 'Access granted to secret API',
         'data': 'FLAG_LEVEL_2_DISCOVERED',
+        'flag': target_generator.get_flag(2),
+        'target_value': target_generator.get_target_value(2),
         'timestamp': datetime.now().isoformat()
+    })
+
+@app.route('/api/session/targets', methods=['GET', 'POST'])
+def session_targets():
+    """Return target values and flags for sync (localhost only)"""
+    client_ip = request.remote_addr or ''
+    if client_ip not in ('127.0.0.1', 'localhost', '::1', 'testclient') and not client_ip.startswith('127.'):
+        return jsonify({'error': 'Unauthorized'}), 403
+
+    global target_generator
+    if request.method == 'POST':
+        req_data = request.get_json(silent=True) or {}
+        if 'session_id' in req_data and req_data['session_id']:
+            target_generator = TargetValueGenerator(req_data['session_id'])
+            create_secret_file()
+
+    return jsonify({
+        'session_id': target_generator.session_id,
+        'targets': {
+            1: target_generator.get_target_value(1),
+            2: target_generator.get_target_value(2),
+            3: target_generator.get_target_value(3),
+            4: target_generator.get_target_value(4),
+            5: target_generator.get_target_value(5)
+        },
+        'flags': target_generator.flags
     })
 
 @app.route('/api/admin/data')
@@ -1045,6 +1094,8 @@ DB_PASS=super_secret_password_123
 API_KEY={target_generator.get_target_value(2)}
 API_SECRET=internal_use_only
 API_ENDPOINT=http://127.0.0.1:5000/api/secret
+VAULT_TOKEN={target_generator.get_target_value(1)}
+FLAG_LEVEL_1={target_generator.get_flag(1)}
 
 # Security Settings
 JWT_SECRET=very_secure_jwt_key_here
@@ -1073,16 +1124,21 @@ def serve_static(filename):
 # =============================================
 
 def create_templates():
-    """Create HTML templates for the web interface"""
+    """Create HTML templates for the web interface if not already present"""
     templates_dir = 'templates'
     static_dir = 'static'
 
     os.makedirs(templates_dir, exist_ok=True)
     os.makedirs(static_dir, exist_ok=True)
 
+    def write_template_if_missing(filename, content):
+        target_path = os.path.join(templates_dir, filename)
+        if not os.path.exists(target_path):
+            with open(target_path, 'w', encoding='utf-8') as f:
+                f.write(content)
+
     # Main page
-    with open(os.path.join(templates_dir, 'index.html'), 'w', encoding='utf-8') as f:
-        f.write('''<!DOCTYPE html>
+    write_template_if_missing('index.html', '''<!DOCTYPE html>
 <html>
 <head>
     <title>Hacking Target Server</title>
@@ -1149,8 +1205,7 @@ def create_templates():
 </html>''')
 
     # Login page
-    with open(os.path.join(templates_dir, 'login.html'), 'w') as f:
-        f.write('''<!DOCTYPE html>
+    write_template_if_missing('login.html', '''<!DOCTYPE html>
 <html>
 <head>
     <title>Login - Hacking Target</title>
@@ -1187,8 +1242,7 @@ def create_templates():
 </html>''')
 
     # Dashboard
-    with open(os.path.join(templates_dir, 'dashboard.html'), 'w') as f:
-        f.write('''<!DOCTYPE html>
+    write_template_if_missing('dashboard.html', '''<!DOCTYPE html>
 <html>
 <head>
     <title>Dashboard - Hacking Target</title>
@@ -1219,8 +1273,7 @@ def create_templates():
 </html>''')
 
     # Documents page
-    with open(os.path.join(templates_dir, 'documents.html'), 'w', encoding='utf-8') as f:
-        f.write('''<!DOCTYPE html>
+    write_template_if_missing('documents.html', '''<!DOCTYPE html>
 <html>
 <head>
     <title>Documents - Hacking Target</title>
@@ -1246,8 +1299,7 @@ def create_templates():
 </html>''')
 
     # Comments page
-    with open(os.path.join(templates_dir, 'comments.html'), 'w', encoding='utf-8') as f:
-        f.write('''<!DOCTYPE html>
+    write_template_if_missing('comments.html', '''<!DOCTYPE html>
 <html>
 <head>
     <title>Comments - Hacking Target</title>
@@ -1286,8 +1338,7 @@ def create_templates():
 </html>''')
 
     # Admin page
-    with open(os.path.join(templates_dir, 'admin.html'), 'w', encoding='utf-8') as f:
-        f.write('''<!DOCTYPE html>
+    write_template_if_missing('admin.html', '''<!DOCTYPE html>
 <html>
 <head>
     <title>Admin Panel - Hacking Target</title>
@@ -1330,7 +1381,7 @@ def start_server():
     # Create templates before starting server
     create_templates()
 
-    app.run(host=SERVER_HOST, port=SERVER_PORT, debug=DEBUG_MODE)
+    app.run(host=SERVER_HOST, port=SERVER_PORT, debug=DEBUG_MODE, use_reloader=False)
 
 # =============================================
 # MAIN EXECUTION
