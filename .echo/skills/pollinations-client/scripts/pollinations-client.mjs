@@ -1053,6 +1053,20 @@ function bodyFromOptions(options = {}) {
   return body;
 }
 
+// `input`/`text` are scaffolding flags (never forwarded verbatim), so speech
+// commands need them re-injected into the request body explicitly.
+function speechBodyFromOptions(options = {}) {
+  const body = bodyFromOptions(options);
+  const text = [options.input, options.text, body.input, body.text]
+    .find((value) => typeof value === 'string' && value.trim());
+  if (!text) {
+    throw new Error("speech: fehlender Text. Nutze --input \"...\" oder --body '{\"input\":\"...\"}'.");
+  }
+  body.input = text;
+  if (!body.voice && typeof options.voice === 'string') body.voice = options.voice;
+  return body;
+}
+
 async function main() {
   const { command, options, rawArgs } = parseArgs();
 
@@ -1100,10 +1114,10 @@ async function main() {
         await generateAudioGet(withOutFile(options));
         break;
       case 'speech':
-        await generateSpeechV1(bodyFromOptions(options), options.out || options.outFile);
+        await generateSpeechV1(speechBodyFromOptions(options), options.out || options.outFile);
         break;
       case 'speech-timestamps':
-        await generateSpeechWithTimestampsV1(bodyFromOptions(options));
+        await generateSpeechWithTimestampsV1(speechBodyFromOptions(options));
         break;
       case 'voice-changer':
         await voiceChangerV1(bodyFromOptions(options));

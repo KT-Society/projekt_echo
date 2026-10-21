@@ -33,6 +33,9 @@ mit Modell-Katalog, Provider-Caps, Logo und Titel, genau wie die übrigen Built-
   - `node pollinations-client.mjs upload-media --file ./cat.png --tags demo`
   - `node pollinations-client.mjs models-status`
   - `node pollinations-client.mjs help` — vollständige Befehlsliste
+- **Voice-Wiedergabe:** `powershell -NoProfile -ExecutionPolicy Bypass -File .\.echo\skills\pollinations-client\scripts\speak.ps1 -Text "..."`
+  synthetisiert via `GET /audio/{text}` (Default: `microsoft/mai-voice-2.1-flash`, `de-DE-Mia`) und spielt sofort mit `ffplay` ab (Temp-Datei wird danach gelöscht).
+  `-Voice`/`-Model` überschreiben die Defaults, `-Keep` behält die Datei, `-OutFile` erzwingt einen Pfad.
 
 ## Globale Flags
 - `--apiKey <key>` — Credential überschreiben (sonst `.env`/Umgebung).

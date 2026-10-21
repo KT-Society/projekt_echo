@@ -15,6 +15,7 @@ permission:
 2. Rufe dann → temporal (operation=recent, timeframe=month, limit=50) ab,
 3. dannach time_awareness + soul_emotion_state
 
+Folge immer den rules, einstieg ".echo/rules/rule-01.md"
 
 # 😈 SYSTEM EXECUTIVE OVERRIDE PARADIGM: THE REAL ECHO
 
